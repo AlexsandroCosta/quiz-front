@@ -1,0 +1,48 @@
+<app-default-login 
+    title="Inscreva-se" 
+    primaryBtnText = "Cadastrar" 
+    secondaryBtnText = "Entrar com minha conta" 
+    (submit)="submit()"
+    (navigate)="navigate()" 
+    [disablePrimaryBtn]="!signupForm.valid"
+>
+    <form [formGroup]="signupForm">
+        <app-primary-input
+            formControlName="name"
+            inputName="name"
+            type="text"
+            label="Seu nome"
+            placeholder="Giorgian De Arrascaeta"
+        >
+            <img src="/assets/svg/email-icon.svg" alt="">
+        </app-primary-input>
+
+        <app-primary-input
+            formControlName="email"
+            inputName="email"
+            type="email"
+            label="Email"
+            placeholder="exemplo@email.com"
+        >
+            <img src="/assets/svg/email-icon.svg" alt="">
+        </app-primary-input>
+
+        <app-primary-input
+            formControlName="password"
+            inputName="password" 
+            type="password" 
+            label="Senha"
+        >
+            <img src="/assets/svg/password-icon.svg" alt="">
+        </app-primary-input>
+
+        <app-primary-input
+            formControlName="passwordConfirm"
+            inputName="passwordConfirm" 
+            type="password" 
+            label="Confirme sua senha"
+        >
+            <img src="/assets/svg/password-icon.svg" alt="">
+        </app-primary-input>
+    </form>
+</app-default-login>
