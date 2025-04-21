@@ -1,9 +1,31 @@
 <app-default-login 
     title="Faça login em sua conta" 
-    primaryBtnText = "Faça login agora" 
-    secondaryBtnText = "Inscreva-se agora"
+    primaryBtnText = "Entrar" 
+    secondaryBtnText = "Cadastre-se" 
+    (submit)="submit()"
+    (navigate)="navigate()" 
+    [disablePrimaryBtn]="!loginForm.valid"
 >
     <form [formGroup]="loginForm">
+        <app-primary-input
+            formControlName="email"
+            inputName="email"
+            type="email"
+            label="Email"
+            placeholder="exemplo@email.com"
+        >
+            <img src="/assets/svg/email-icon.svg" alt="">
+        </app-primary-input>
 
+        <app-primary-input
+            formControlName="password"
+            inputName="password" 
+            type="password" 
+            label="Senha"
+        >
+            <img src="/assets/svg/password-icon.svg" alt="">
+        </app-primary-input>
+        
+        <span>Esqueci a senha</span>
     </form>
 </app-default-login>
