@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-login-padrao',
@@ -7,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './login-padrao.component.sass'
 })
 export class LoginPadraoComponent {
-
+  @Input() title: string = "";
+  @Input() primaryBtnText: string = "";
+  @Input() secondaryBtnText: string = "";
 }
