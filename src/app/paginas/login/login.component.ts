@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { LoginPadraoComponent } from '../../components/login-padrao/login-padrao.component';
+import { DefaulLoginComponent } from '../../components/default-login/default-login.component';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   imports: [
-    LoginPadraoComponent,
+    DefaulLoginComponent,
     ReactiveFormsModule
   ],
   templateUrl: './login.component.html',

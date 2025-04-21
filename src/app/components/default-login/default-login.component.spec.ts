@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LoginPadraoComponent } from './login-padrao.component';
+import { DefaulLoginComponent } from './default-login.component';
 
-describe('LoginPadraoComponent', () => {
-  let component: LoginPadraoComponent;
-  let fixture: ComponentFixture<LoginPadraoComponent>;
+describe('DefaulLoginComponent', () => {
+  let component: DefaulLoginComponent;
+  let fixture: ComponentFixture<DefaulLoginComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LoginPadraoComponent]
+      imports: [DefaulLoginComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LoginPadraoComponent);
+    fixture = TestBed.createComponent(DefaulLoginComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
