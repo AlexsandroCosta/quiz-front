@@ -26,14 +26,42 @@
             <input type="text"
                    aria-label="Área de conhecimento"
                    matInput
-                   [formControl]="myControl"
+                   [formControl]="areaControl" 
                    [matAutocomplete]="auto">
             <mat-autocomplete #auto="matAutocomplete">
-              @for (option of filteredOptions | async; track option) {
+              @for (option of filteredAreas | async; track option) {
                 <mat-option [value]="option">{{option}}</mat-option>
               }
             </mat-autocomplete>
           </mat-form-field>
+
+          <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Conteúdos</mat-label>
+            <mat-chip-list #chipList aria-label="Seleção de conteúdos">
+              <mat-chip *ngFor="let conteudo of conteudosSelecionados"
+                        [selectable]="true"
+                        [removable]="true"
+                        (removed)="removerConteudo(conteudo)">
+                {{conteudo}}
+                <button matChipRemove>
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              </mat-chip>
+              <input
+                [formControl]="conteudoControl"
+                [matAutocomplete]="autoConteudo"
+                [matChipInputFor]="chipList"
+                (matChipInputTokenEnd)="adicionarConteudoManual($event)">
+            </mat-chip-list>
+          
+            <mat-autocomplete #autoConteudo="matAutocomplete" (optionSelected)="selecionarConteudo($event)">
+              <mat-option *ngFor="let option of filteredConteudos | async" [value]="option">
+                {{option}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          
+          
         </form>
     </section>
 </app-default-home>
