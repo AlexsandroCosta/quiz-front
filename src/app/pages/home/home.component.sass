@@ -1,0 +1,76 @@
+@import "../../../styles/variables.sass"
+    
+.ranking
+  padding: 0 3rem
+  background-color: white
+  border-radius: 10px
+  margin-bottom: 2rem
+  display: flex
+  flex-direction: column
+  align-items: center
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1)
+
+  h2
+    margin-bottom: 1rem
+    font-size: 1.5rem
+    color: #333
+
+  .ranking-list
+    list-style: none
+    padding: 0
+    width: 100%
+    max-width: 500px
+
+    li
+        background-color: $gray-bg
+        padding: 0.6rem 1rem
+        margin: 0.3rem 0
+        border-radius: 8px
+        display: flex
+        justify-content: space-between
+        align-items: center
+        transition: transform 0.2s ease, background-color 0.3s ease
+
+        &:hover
+            background-color: #e9ecef
+            transform: translateY(-2px)
+
+        .pts
+            font-weight: bold
+            color: #555
+
+  .ver-mais
+    display: inline-block
+    margin-top: 1.5rem
+    margin-bottom: 1.5rem
+    color: #007bff
+    text-decoration: none
+    font-weight: 500
+
+    &:hover
+      text-decoration: underline
+
+.sectionForm
+  background-color: white
+  border-radius: 10px
+  display: flex
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1)
+  flex-direction: row;
+  align-items: start;
+  height: 100%;
+  padding: 0 25px 0 0;
+
+  img
+    border-radius: 10px 0 0 10px
+
+  .quizForm
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    flex: 1;
+
+    .full-width
+      width: 100%;
+
+  

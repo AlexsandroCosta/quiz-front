@@ -1,0 +1,14 @@
+<header>
+    <nav class="navbar">
+        <div class="logo" (click)="inicio()">
+            <img src="/assets/images/logo.png" alt="Logo" />
+        </div>
+        <ul class="nav-links">
+        <li><a (click)="logout()">Sair</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <ng-content></ng-content>
+</main>
