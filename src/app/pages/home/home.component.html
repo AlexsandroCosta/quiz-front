@@ -35,7 +35,37 @@
             </mat-autocomplete>
           </mat-form-field>
 
+          <mat-form-field class="chip-list">
+            <mat-label>Conteúdos</mat-label>
+            <mat-chip-grid #chipGrid aria-label="Seleção de conteúdos">
+              @for (content of contents(); track $index) {
+                <mat-chip-row (removed)="remove(content)">
+                  {{content}}
+                  <button matChipRemove [attr.aria-label]="'remove ' + content">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+            </mat-chip-grid>
+            <input
+              name="currentContent"
+              placeholder="Adicionar conteúdo..."
+              #fruitInput
+              [(ngModel)]="currentContent"
+              [matChipInputFor]="chipGrid"
+              [matAutocomplete]="auto"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addContent($event)"
+            />
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event); fruitInput.value = ''">
+              @for (fruit of filteredContent(); track fruit) {
+                <mat-option [value]="fruit">{{fruit}}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
           
+          <button class="btn-quiz">Gerar Quiz</button>
+
         </form>
     </section>
 </app-default-home>
