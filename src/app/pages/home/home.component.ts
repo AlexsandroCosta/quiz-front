@@ -9,7 +9,6 @@ import { map, Observable, startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 interface quizForm {
   area: FormControl<string>,
@@ -27,7 +26,6 @@ interface quizForm {
     MatAutocompleteModule,
     MatChipsModule,
     MatIconModule,
-    BrowserAnimationsModule
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.sass',
@@ -39,11 +37,7 @@ export class HomeComponent {
 
   areaControl = new FormControl('');
   areaOptions: string[] = ['Matemática', 'Português', 'Química', 'Biologia', 'Física'].sort();
-  conteudoControl = new FormControl('');
-  conteudosSelecionados: string[] = [];
-  
   filteredAreas: Observable<string[]>;
-  filteredConteudos!: Observable<string[]>;
 
   conteudosPorArea: Record<string, string[]> = {
     Matemática: ['Álgebra', 'Geometria', 'Trigonometria'],
@@ -52,8 +46,6 @@ export class HomeComponent {
     Biologia: ['Citologia', 'Genética', 'Ecologia'],
     Física: ['Mecânica', 'Termologia', 'Óptica']
   };
-
-  conteudosDisponiveis: string[] = [];
 
   constructor(
     private router: Router
@@ -68,21 +60,6 @@ export class HomeComponent {
       map(value => this._filterAreas(value || ''))
     )
 
-    this.areaControl.valueChanges.subscribe(area => {
-      this.conteudosSelecionados = [];
-      this.quizForm.get('conteudos')?.setValue([]);
-      
-      if (area && this.conteudosPorArea.hasOwnProperty(area)) {
-        this.conteudosDisponiveis = this.conteudosPorArea[area];
-      } else {
-        this.conteudosDisponiveis = [];
-      }
-    
-      this._setupFilteredConteudos();
-    })
-
-    this._setupFilteredConteudos();
-    
   }
 
   private _filterAreas(value: string): string[] {
@@ -90,42 +67,4 @@ export class HomeComponent {
     return this.areaOptions.filter(option => option.toLowerCase().includes(filterValue));
   }
 
-  private _setupFilteredConteudos(): void {
-    this.filteredConteudos = this.conteudoControl.valueChanges.pipe(
-      startWith(''),
-      map(value => {
-        const filterValue = (value || '').toLowerCase();
-        return this.conteudosDisponiveis.filter(option =>
-          option.toLowerCase().includes(filterValue) &&
-          !this.conteudosSelecionados.includes(option)
-        );
-      })
-    );
-  }
-
-  selecionarConteudo(event: any): void {
-    const value = event.option.value;
-    if (value && !this.conteudosSelecionados.includes(value)) {
-      this.conteudosSelecionados.push(value);
-      this.quizForm.get('conteudos')?.setValue(this.conteudosSelecionados);
-    }
-    this.conteudoControl.setValue('');
-  }
-
-  removerConteudo(conteudo: string): void {
-    const index = this.conteudosSelecionados.indexOf(conteudo);
-    if (index >= 0) {
-      this.conteudosSelecionados.splice(index, 1);
-      this.quizForm.get('conteudos')?.setValue(this.conteudosSelecionados);
-    }
-  }
-
-  adicionarConteudoManual(event: any): void {
-    const inputValue = event.value?.trim();
-    if (inputValue && !this.conteudosSelecionados.includes(inputValue)) {
-      this.conteudosSelecionados.push(inputValue);
-      this.quizForm.get('conteudos')?.setValue(this.conteudosSelecionados);
-    }
-    this.conteudoControl.setValue('');
-  }
 }
