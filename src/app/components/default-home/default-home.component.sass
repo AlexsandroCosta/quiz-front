@@ -1,0 +1,42 @@
+@import "../../../styles/variables.sass"
+  
+header
+  background-color: $primary-color;
+  padding: 18px 0;
+
+  .navbar
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+
+  .logo
+    cursor: pointer;
+    
+  .logo img
+    height: 40px;
+
+  .nav-links
+    list-style: none;
+    display: flex;
+    gap: 20px;
+
+    li a
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+
+    li a.active
+      text-decoration: underline;
+
+    li a:hover
+      opacity: 0.8;
+      cursor: pointer;
+
+main
+  display: flex;
+  background-color: $gray-bg;
+  padding: 12px;
+  flex-direction: row;
+  gap: 50px

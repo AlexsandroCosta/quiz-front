@@ -1,0 +1,41 @@
+<app-default-home>
+    <section class="ranking">
+        <img src="/assets/images/ranking-illustration.png" alt="">
+        <h2>RANKING</h2>
+        <ul class="ranking-list">
+            <li><span class="gold">🥇</span> Time Alpha <span class="pts">(45 pts)</span></li>
+            <li><span class="silver">🥈</span> Time Bravo <span class="pts">(42 pts)</span></li>
+            <li><span class="bronze">🥉</span> Time Charlie <span class="pts">(40 pts)</span></li>
+            <li>4º - Time Delta <span class="pts">(38 pts)</span></li>
+            <li>5º - Time Echo <span class="pts">(36 pts)</span></li>
+            <li>6º - Time Foxtrot <span class="pts">(34 pts)</span></li>
+            <li>7º - Time Golf <span class="pts">(32 pts)</span></li>
+            <li>8º - Time Hotel <span class="pts">(30 pts)</span></li>
+            <li>9º - Time India <span class="pts">(28 pts)</span></li>
+            <li>10º - Time Juliett <span class="pts">(26 pts)</span></li>
+        </ul>
+        <a href="/ranking" class="ver-mais">Ver ranking completo</a>
+    </section>
+
+    <section class="sectionForm">
+        <img src="/assets/images/form-illustration.png" alt="">
+ 
+        <form class="quizForm" [formGroup]="quizForm">
+          <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Área de conhecimento</mat-label>
+            <input type="text"
+                   aria-label="Área de conhecimento"
+                   matInput
+                   [formControl]="areaControl" 
+                   [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete">
+              @for (option of filteredAreas | async; track option) {
+                <mat-option [value]="option">{{option}}</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+
+          
+        </form>
+    </section>
+</app-default-home>
