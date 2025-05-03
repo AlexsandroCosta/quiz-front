@@ -1,41 +1,117 @@
 <app-default-home>
-    <section class="ranking">
-        <img src="/assets/images/ranking-illustration.png" alt="">
-        <h2>RANKING</h2>
-        <ul class="ranking-list">
-            <li><span class="gold">🥇</span> Time Alpha <span class="pts">(45 pts)</span></li>
-            <li><span class="silver">🥈</span> Time Bravo <span class="pts">(42 pts)</span></li>
-            <li><span class="bronze">🥉</span> Time Charlie <span class="pts">(40 pts)</span></li>
-            <li>4º - Time Delta <span class="pts">(38 pts)</span></li>
-            <li>5º - Time Echo <span class="pts">(36 pts)</span></li>
-            <li>6º - Time Foxtrot <span class="pts">(34 pts)</span></li>
-            <li>7º - Time Golf <span class="pts">(32 pts)</span></li>
-            <li>8º - Time Hotel <span class="pts">(30 pts)</span></li>
-            <li>9º - Time India <span class="pts">(28 pts)</span></li>
-            <li>10º - Time Juliett <span class="pts">(26 pts)</span></li>
-        </ul>
-        <a href="/ranking" class="ver-mais">Ver ranking completo</a>
-    </section>
+  <section class="ranking">
+    <img src="/assets/images/ranking-illustration.png" alt="">
+    <h2>RANKING</h2>
+  
+    <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
+      <div *cdkVirtualFor="let team of ranking" class="ranking-card">
+        <div class="ranking-icon">
+          <ng-container [ngSwitch]="team.posicao">
+            <span *ngSwitchCase="1" class="medal gold">🥇</span>
+            <span *ngSwitchCase="2" class="medal silver">🥈</span>
+            <span *ngSwitchCase="3" class="medal bronze">🥉</span>
+            <span *ngSwitchDefault class="position">{{team.posicao}}º</span>
+          </ng-container>
+        </div>
+        <div class="ranking-info">
+          <div class="team-name">{{team.nome}}</div>
+          <div class="team-points">{{team.pontos}} pts</div>
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  
+    <a href="/ranking" class="ver-mais">Ver ranking completo</a>
+  </section>  
+
+  <div class="mid">
 
     <section class="sectionForm">
         <img src="/assets/images/form-illustration.png" alt="">
- 
+
         <form class="quizForm" [formGroup]="quizForm">
           <mat-form-field class="full-width" appearance="fill">
             <mat-label>Área de conhecimento</mat-label>
             <input type="text"
-                   aria-label="Área de conhecimento"
-                   matInput
-                   [formControl]="areaControl" 
-                   [matAutocomplete]="auto">
-            <mat-autocomplete #auto="matAutocomplete">
+                  aria-label="Área de conhecimento"
+                  matInput
+                  [formControl]="quizForm.controls.area"
+                  [matAutocomplete]="autoArea">
+            <mat-autocomplete #autoArea="matAutocomplete">
               @for (option of filteredAreas | async; track option) {
                 <mat-option [value]="option">{{option}}</mat-option>
               }
             </mat-autocomplete>
           </mat-form-field>
 
-          
+
+          <mat-form-field class="chip-list">
+            <mat-label>Conteúdos</mat-label>
+            <mat-chip-grid #chipGrid aria-label="Seleção de conteúdos">
+              @for (content of contents(); track $index) {
+                <mat-chip-row (removed)="remove(content)">
+                  {{content}}
+                  <button matChipRemove [attr.aria-label]="'remove ' + content">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip-row>
+              }
+            </mat-chip-grid>
+            <input
+              name="currentContent"
+              placeholder="Adicionar conteúdo..."
+              #contentInput
+              [formControl]="currentContentControl"
+              [matChipInputFor]="chipGrid"
+              [matAutocomplete]="autoContent"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addContent($event)"
+              [disabled]="!quizForm.controls.area.value"
+            />
+            <mat-autocomplete #autoContent="matAutocomplete" (optionSelected)="selected($event); contentInput.value = ''">
+              @for (content of filteredContentSignal(); track content) {
+                <mat-option [value]="content">{{content}}</mat-option>
+              }            
+            </mat-autocomplete>
+          </mat-form-field>
+        
+          <button class="btn-quiz">Gerar Quiz</button>
+
         </form>
     </section>
+
+    <section class="sectionStatistics">
+
+      
+
+      <img src="/assets/images/statistics-illustration.png" alt="">
+    </section>
+
+  </div>
+
+  <section class="sectionMatches">
+    <h2>HISTÓRICO</h2>
+    
+    <ng-container *ngIf="historico.length > 0; else semHistorico">
+      <cdk-virtual-scroll-viewport itemSize="100" class="viewport">
+        <div *cdkVirtualFor="let item of historico" class="item-card">
+          <div class="item-header">
+            <span class="item-date">{{ item.data | date:'dd/MM/yyyy' }} {{ item.hora }}</span>
+            <span class="item-area">{{item.area}}</span>
+          </div>
+          <div class="item-footer">
+            <span class="item-label">Pontos:</span>
+            <span class="item-pontos">{{item.pontos}}</span>
+          </div>
+        </div>
+      </cdk-virtual-scroll-viewport>
+    </ng-container>
+
+    <ng-template #semHistorico>
+      <div class="mensagem-vazia">
+        Nenhum histórico disponível.
+      </div>
+    </ng-template>
+      
+  </section>
+
 </app-default-home>
