@@ -3,22 +3,31 @@
     <img src="/assets/images/ranking-illustration.png" alt="">
     <h2>RANKING</h2>
   
-    <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
-      <div *cdkVirtualFor="let team of ranking" class="ranking-card">
-        <div class="ranking-icon">
-          <ng-container [ngSwitch]="team.posicao">
-            <span *ngSwitchCase="1" class="medal gold">🥇</span>
-            <span *ngSwitchCase="2" class="medal silver">🥈</span>
-            <span *ngSwitchCase="3" class="medal bronze">🥉</span>
-            <span *ngSwitchDefault class="position">{{team.posicao}}º</span>
-          </ng-container>
+    <ng-container *ngIf="ranking.length > 0; else semRanking">
+      <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
+        <div *cdkVirtualFor="let team of ranking" class="ranking-card">
+          <div class="ranking-icon">
+            <ng-container [ngSwitch]="team.posicao">
+              <span *ngSwitchCase="1" class="medal gold">🥇</span>
+              <span *ngSwitchCase="2" class="medal silver">🥈</span>
+              <span *ngSwitchCase="3" class="medal bronze">🥉</span>
+              <span *ngSwitchDefault class="position">{{team.posicao}}º</span>
+            </ng-container>
+          </div>
+          <div class="ranking-info">
+            <div class="team-name">{{team.nome}}</div>
+            <div class="team-points">{{team.pontos}} pts</div>
+          </div>
         </div>
-        <div class="ranking-info">
-          <div class="team-name">{{team.nome}}</div>
-          <div class="team-points">{{team.pontos}} pts</div>
-        </div>
+      </cdk-virtual-scroll-viewport>
+    </ng-container>
+    
+    <ng-template #semRanking>
+      <div class="mensagem-vazia">
+        Nenhum ranking disponível.
       </div>
-    </cdk-virtual-scroll-viewport>
+    </ng-template>
+    
   
     <a href="/ranking" class="ver-mais">Ver ranking completo</a>
   </section>  
