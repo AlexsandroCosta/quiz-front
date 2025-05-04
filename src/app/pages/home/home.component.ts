@@ -1,5 +1,5 @@
-import { Component, ChangeDetectionStrategy, computed, inject, signal, effect } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -128,11 +128,13 @@ export class HomeComponent {
   };
   
 
+  // Define um Observable para áreas filtradas
   filteredAreas: Observable<string[]> = this.quizForm.controls.area.valueChanges.pipe(
     startWith(''),
-    map(value => this._filterAreas(value || ''))
+    map(value => value ? this._filterAreas(value) : this.areaOptions)
   );
-
+  
+  // Define os conteúdos disponíveis para cada área
   allContents: Record<string, string[]> = {
     Matemática: ['Álgebra', 'Geometria', 'Trigonometria'],
     Português: ['Gramática', 'Literatura', 'Interpretação'],
@@ -141,34 +143,44 @@ export class HomeComponent {
     Física: ['Mecânica', 'Termologia', 'Óptica']
   };
 
-  filteredContent = computed(() => {
-    const area = this.quizForm.get('area')?.value;
-    const currentInput = this.currentContentControl.value?.toLowerCase() ?? '';
-    if (!area || !this.allContents[area]) return [];
-    const areaContents = this.allContents[area];
-    return currentInput
-      ? areaContents.filter(c => c.toLowerCase().includes(currentInput))
-      : areaContents;
-  });
-
-  announcer = inject(LiveAnnouncer);
-
-  constructor(private router: Router) {
-    effect(() => {
+  // Observable para conteúdos filtrados
+  filteredContent$: Observable<string[]> = this.quizForm.valueChanges.pipe(
+    startWith(this.quizForm.value), // Inicia com os valores atuais do formulário
+    map(() => {
       const area = this.quizForm.get('area')?.value;
       const currentInput = this.currentContentControl.value?.toLowerCase() ?? '';
-      if (!area || !this.allContents[area]) {
-        this.filteredContentSignal.set([]);
+
+      if (!area || !this.allContents[area]) return [];
+      const areaContents = this.allContents[area];
+      
+      return currentInput
+        ? areaContents.filter(c => c.toLowerCase().includes(currentInput))
+        : areaContents;
+    })
+  );
+  
+  announcer = inject(LiveAnnouncer);
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    // Habilita/desabilita o FormControl e limpa chips ao trocar de área
+    this.quizForm.get('area')!.valueChanges.subscribe(area => {
+      // limpa os conteúdos selecionados
+      this.contents.set([]); // Limpa a lista de conteúdos selecionados
+
+      if (area) {
+        this.currentContentControl.enable({ emitEvent: false });
       } else {
-        const areaContents = this.allContents[area];
-        const filtered = currentInput
-          ? areaContents.filter(c => c.toLowerCase().includes(currentInput))
-          : areaContents;
-        this.filteredContentSignal.set(filtered);
+        this.currentContentControl.disable({ emitEvent: false });
       }
     });
+
+    // Inicialmente, como área começa vazia, já desabilita
+    this.currentContentControl.disable({ emitEvent: false });
   }
 
+  // Filtro para as áreas
   private _filterAreas(value: string): string[] {
     const filterValue = value.toLowerCase();
     return this.areaOptions.filter(option => option.toLowerCase().includes(filterValue));
@@ -178,7 +190,8 @@ export class HomeComponent {
     const area = this.quizForm.get('area')?.value;
     if (!area) return;
     const value = (event.value || '').trim();
-    if (value) {
+  
+    if (value && !this.contents().includes(value)) {
       this.contents.update(contents => [...contents, value]);
     }
   }
@@ -194,9 +207,15 @@ export class HomeComponent {
   }
 
   selected(event: MatAutocompleteSelectedEvent): void {
-    const area = this.quizForm.get('area')?.value;
-    if (!area) return;
-    this.contents.update(contents => [...contents, event.option.viewValue]);
-    event.option.deselect();
+  const area = this.quizForm.get('area')?.value;
+  if (!area) return;
+  const selectedValue = event.option.viewValue;
+
+  if (!this.contents().includes(selectedValue)) {
+    this.contents.update(contents => [...contents, selectedValue]);
   }
+
+  event.option.deselect(); // opcional, dependendo do comportamento desejado
+}
+
 }

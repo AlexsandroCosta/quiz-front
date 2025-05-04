@@ -72,13 +72,13 @@
               [matAutocomplete]="autoContent"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
               (matChipInputTokenEnd)="addContent($event)"
-              [disabled]="!quizForm.controls.area.value"
+              [disabled]="!quizForm.get('area')?.value"
             />
             <mat-autocomplete #autoContent="matAutocomplete" (optionSelected)="selected($event); contentInput.value = ''">
-              @for (content of filteredContentSignal(); track content) {
-                <mat-option [value]="content">{{content}}</mat-option>
-              }            
-            </mat-autocomplete>
+              <mat-option *ngFor="let content of filteredContent$ | async" [value]="content">
+                {{ content }}
+              </mat-option>
+            </mat-autocomplete>                     
           </mat-form-field>
         
           <button class="btn-quiz">Gerar Quiz</button>
