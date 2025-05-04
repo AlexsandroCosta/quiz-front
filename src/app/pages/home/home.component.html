@@ -28,8 +28,6 @@
       </div>
     </ng-template>
     
-  
-    <a href="/ranking" class="ver-mais">Ver ranking completo</a>
   </section>  
 
   <div class="mid">
@@ -90,7 +88,15 @@
 
     <section class="sectionStatistics">
 
-      
+      <apx-chart
+        [series]="chartOptions.series"
+        [chart]="chartOptions.chart"
+        [xaxis]="chartOptions.xaxis"
+        [stroke]="chartOptions.stroke"
+        [fill]="chartOptions.fill"
+        [markers]="chartOptions.markers">
+      </apx-chart>
+
 
       <img src="/assets/images/statistics-illustration.png" alt="">
     </section>

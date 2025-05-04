@@ -1,18 +1,36 @@
 import { Component, ChangeDetectionStrategy, computed, inject, signal, effect } from '@angular/core';
-import { DefaultHomeComponent } from "../../components/default-home/default-home.component";
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { map, Observable, startWith } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { FormsModule } from '@angular/forms';
-import {ScrollingModule} from '@angular/cdk/scrolling';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { map, Observable, startWith } from 'rxjs';
+import { DefaultHomeComponent } from "../../components/default-home/default-home.component";
+import { NgApexchartsModule } from 'ng-apexcharts';
+import {
+  ApexChart,
+  ApexAxisChartSeries,
+  ApexStroke,
+  ApexFill,
+  ApexMarkers,
+  ApexXAxis,
+} from 'ng-apexcharts';
+
+export type ChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  stroke: ApexStroke;
+  fill: ApexFill;
+  markers: ApexMarkers;
+  xaxis: ApexXAxis;
+};
 
 @Component({
   selector: 'app-home',
@@ -27,13 +45,13 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
     MatChipsModule,
     MatIconModule,
     FormsModule,
-    ScrollingModule
+    ScrollingModule,
+    NgApexchartsModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class HomeComponent {
   quizForm = new FormGroup({
     area: new FormControl('', { nonNullable: true }),
@@ -41,18 +59,18 @@ export class HomeComponent {
   });
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
-
   currentContentControl = new FormControl('');
   contents = signal<string[]>([]);
+  filteredContentSignal = signal<string[]>([]);
 
   areaOptions: string[] = ['Matemática', 'Português', 'Química', 'Biologia', 'Física'].sort();
 
   historico = [
-    {data: '2025-05-01', hora: '14:00', area: 'Matemática', pontos: 8},
-    {data: '2025-05-02', hora: '10:30', area: 'Português', pontos: 6},
-    {data: '2025-05-02', hora: '13:45', area: 'Química', pontos: 9},
-    {data: '2025-05-03', hora: '09:15', area: 'Biologia', pontos: 7},
-    {data: '2025-05-03', hora: '16:20', area: 'Física', pontos: 10}
+    { data: '2025-05-01', hora: '14:00', area: 'Matemática', pontos: 8 },
+    { data: '2025-05-02', hora: '10:30', area: 'Português', pontos: 6 },
+    { data: '2025-05-02', hora: '13:45', area: 'Química', pontos: 9 },
+    { data: '2025-05-03', hora: '09:15', area: 'Biologia', pontos: 7 },
+    { data: '2025-05-03', hora: '16:20', area: 'Física', pontos: 10 }
   ].sort((a, b) => {
     const dataA = new Date(`${a.data}T${a.hora}`);
     const dataB = new Date(`${b.data}T${b.hora}`);
@@ -70,7 +88,45 @@ export class HomeComponent {
     { posicao: 8, nome: 'Time Hotel', pontos: 30 },
     { posicao: 9, nome: 'Time India', pontos: 28 },
     { posicao: 10, nome: 'Time Juliett', pontos: 26 }
-  ];  
+  ];
+
+  public chartOptions: ChartOptions = {
+    series: [
+      {
+        name: "Total de pontos",
+        data: [80, 50, 30, 40, 100, 20]
+      }
+    ],
+    chart: {
+      type: "radar",
+      height: 285,
+      toolbar: {
+        show: false // aqui desativa o botão de download
+      },
+    },
+    xaxis: {
+      categories: ["Matemática", "Português", "Química", "Biologia", "Física", "Artes"],
+      labels: {
+        style: {
+          colors: ['#555555', '#555555','#555555','#555555','#555555','#555555'], 
+          fontSize: '14px'
+        }
+      },
+    },
+    stroke: {
+      width: 2,
+      colors: ['#fea3b2'] 
+    },
+    fill: {
+      opacity: 0.1,
+      colors: ['#fea3b2']
+    },
+    markers: {
+      size: 4,
+      colors: ['#fea3b2']
+    },
+  };
+  
 
   filteredAreas: Observable<string[]> = this.quizForm.controls.area.valueChanges.pipe(
     startWith(''),
@@ -97,10 +153,7 @@ export class HomeComponent {
 
   announcer = inject(LiveAnnouncer);
 
-  filteredContentSignal = signal<string[]>([]);
-
   constructor(private router: Router) {
-    // sempre que área ou input mudarem, atualiza o sinal
     effect(() => {
       const area = this.quizForm.get('area')?.value;
       const currentInput = this.currentContentControl.value?.toLowerCase() ?? '';
@@ -124,8 +177,6 @@ export class HomeComponent {
   addContent(event: MatChipInputEvent): void {
     const area = this.quizForm.get('area')?.value;
     if (!area) return;
-
-
     const value = (event.value || '').trim();
     if (value) {
       this.contents.update(contents => [...contents, value]);
@@ -149,4 +200,3 @@ export class HomeComponent {
     event.option.deselect();
   }
 }
-
