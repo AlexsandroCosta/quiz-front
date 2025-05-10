@@ -1,8 +1,56 @@
 <app-default-home>
     <section>
-        <div>
-            <img src="/assets/images/chad.jpg" alt="Imagem de perfil">
-            <p>Meu nome</p>
+      <form [formGroup]="formPerfil">
+        <div class="profile-header">
+          <label for="profile-pic" class="profile-pic-label">
+            <img src="/assets/images/chad.jpg" alt="Imagem de perfil" class="profile-pic" />
+            <input type="file" id="profile-pic" hidden />
+          </label>
+          <p class="profile-name">Meu nome</p>
         </div>
+  
+        <div class="profile-fields">
+          <app-primary-input
+            formControlName="nome"
+            inputName="nome"
+            type="text"
+            label="Nome"
+            placeholder="Meu nome"
+          >
+            <img src="/assets/images/user-icon.png" alt="">
+          </app-primary-input>
+  
+          <app-primary-input
+            formControlName="email"
+            inputName="email"
+            type="email"
+            label="Email"
+            placeholder="exemplo@email.com"
+          >
+            <img src="/assets/images/email-icon.svg" alt="">
+          </app-primary-input>
+  
+          <app-primary-input
+            formControlName="nova_senha"
+            inputName="nova_senha"
+            type="password"
+            label="Nova senha"
+          >
+            <img src="/assets/images/password-icon.svg" alt="">
+          </app-primary-input>
+  
+          <app-primary-input
+            formControlName="conf_senha"
+            inputName="conf_senha"
+            type="password"
+            label="Confirmar senha"
+          >
+            <img src="/assets/images/password-icon.svg" alt="">
+          </app-primary-input>
+        </div>
+  
+        <button class="btn-save" type="submit">Salvar alterações</button>
+      </form>
     </section>
-</app-default-home>
+  </app-default-home>
+  
