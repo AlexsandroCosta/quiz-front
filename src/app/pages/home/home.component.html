@@ -80,8 +80,19 @@
               </mat-option>
             </mat-autocomplete>                     
           </mat-form-field>
+
+          <div>
+            <label>Nível: </label>
+            <mat-radio-group formControlName="nivel">
+              <mat-radio-button value="facil">Fácil</mat-radio-button>
+              <mat-radio-button value="medio">Médio</mat-radio-button>
+              <mat-radio-button value="dificil">Difícil</mat-radio-button>
+            </mat-radio-group>
+          </div>
         
-          <button class="btn-quiz">Gerar Quiz</button>
+          <button class="btn-quiz"
+          [disabled]="!quizForm.get('area')?.value"
+          >Gerar Quiz</button>
 
         </form>
     </section>

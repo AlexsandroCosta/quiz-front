@@ -11,6 +11,7 @@ import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { map, Observable, startWith } from 'rxjs';
 import { DefaultHomeComponent } from "../../components/default-home/default-home.component";
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -44,6 +45,7 @@ export type ChartOptions = {
     MatAutocompleteModule,
     MatChipsModule,
     MatIconModule,
+    MatRadioModule,
     FormsModule,
     ScrollingModule,
     NgApexchartsModule
@@ -56,6 +58,7 @@ export class HomeComponent {
   quizForm = new FormGroup({
     area: new FormControl('', { nonNullable: true }),
     conteudos: new FormControl<string[]>([], { nonNullable: true }),
+    nivel: new FormControl('facil'),
   });
 
   separatorKeysCodes: number[] = [ENTER, COMMA];

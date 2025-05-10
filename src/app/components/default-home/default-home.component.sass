@@ -1,15 +1,5 @@
 @import "../../../styles/variables.sass"
 
-*,
-*::before,
-*::after
-  box-sizing: border-box
-
-html, body
-  margin: 0
-  padding: 0
-  overflow-x: hidden
-
 header
   background-color: $primary-color
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
@@ -59,9 +49,19 @@ header
         background-color: darken($primary-color, 10%)
         text-decoration: none
 
+      .profile-icon
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
+
 main
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   display: flex
   background-color: $gray-bg
   padding: 15px
   flex-direction: row
-  gap: 50px
+  gap: 30px

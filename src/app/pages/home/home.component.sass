@@ -11,8 +11,7 @@ section
   flex: 1;
 
 .ranking
-  padding: 0 3rem
-  margin-bottom: 2rem
+  padding: 0 1rem
   flex-direction: column
   align-items: center
 
@@ -23,9 +22,8 @@ section
     color: $text-color
 
   .ranking-list-viewport
-    height: 352px
+    height: 60%
     width: 100%
-    max-width: 500px
     margin: 1rem auto
     padding: 0.5rem
     border: 1px solid #e0e0e0
@@ -85,6 +83,7 @@ section
   width: 45%;
   
   .sectionForm
+    height: 45%;
     padding: 0 25px 0 0;
 
     img
@@ -113,7 +112,11 @@ section
         color: white;
         box-shadow:0px 8px 12px rgba(148.23004603385925, 64.33935597538948, 255, 0.20000000298023224);
 
+        &:disabled
+          opacity: 0.8;
+          
   .sectionStatistics
+    height: 50%;
     padding: 0 7px 0 0;
     margin-top: 35px;
     justify-content: flex-end;
@@ -132,9 +135,8 @@ section
     color: $text-color
 
   .viewport
-    height: 537px
+    height: 90%
     width: 100%
-    max-width: 400px
     border: 1px solid #e0e0e0
     border-radius: 8px
     padding: 0.5rem
