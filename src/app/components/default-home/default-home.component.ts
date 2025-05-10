@@ -14,6 +14,10 @@ export class DefaultHomeComponent {
     this.router.navigate([''])
   }
 
+  perfil(){
+    this.router.navigate(['perfil'])
+  }
+
   logout() {
     // Aqui você limpa o token/sessão do usuário
     //localStorage.removeItem('token'); // ou o que você estiver usando

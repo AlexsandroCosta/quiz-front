@@ -3,24 +3,31 @@
     <img src="/assets/images/ranking-illustration.png" alt="">
     <h2>RANKING</h2>
   
-    <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
-      <div *cdkVirtualFor="let team of ranking" class="ranking-card">
-        <div class="ranking-icon">
-          <ng-container [ngSwitch]="team.posicao">
-            <span *ngSwitchCase="1" class="medal gold">🥇</span>
-            <span *ngSwitchCase="2" class="medal silver">🥈</span>
-            <span *ngSwitchCase="3" class="medal bronze">🥉</span>
-            <span *ngSwitchDefault class="position">{{team.posicao}}º</span>
-          </ng-container>
+    <ng-container *ngIf="ranking.length > 0; else semRanking">
+      <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
+        <div *cdkVirtualFor="let team of ranking" class="ranking-card">
+          <div class="ranking-icon">
+            <ng-container [ngSwitch]="team.posicao">
+              <span *ngSwitchCase="1" class="medal gold">🥇</span>
+              <span *ngSwitchCase="2" class="medal silver">🥈</span>
+              <span *ngSwitchCase="3" class="medal bronze">🥉</span>
+              <span *ngSwitchDefault class="position">{{team.posicao}}º</span>
+            </ng-container>
+          </div>
+          <div class="ranking-info">
+            <div class="team-name">{{team.nome}}</div>
+            <div class="team-points">{{team.pontos}} pts</div>
+          </div>
         </div>
-        <div class="ranking-info">
-          <div class="team-name">{{team.nome}}</div>
-          <div class="team-points">{{team.pontos}} pts</div>
-        </div>
+      </cdk-virtual-scroll-viewport>
+    </ng-container>
+    
+    <ng-template #semRanking>
+      <div class="mensagem-vazia">
+        Nenhum ranking disponível.
       </div>
-    </cdk-virtual-scroll-viewport>
-  
-    <a href="/ranking" class="ver-mais">Ver ranking completo</a>
+    </ng-template>
+    
   </section>  
 
   <div class="mid">
@@ -65,23 +72,42 @@
               [matAutocomplete]="autoContent"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
               (matChipInputTokenEnd)="addContent($event)"
-              [disabled]="!quizForm.controls.area.value"
+              [disabled]="!quizForm.get('area')?.value"
             />
             <mat-autocomplete #autoContent="matAutocomplete" (optionSelected)="selected($event); contentInput.value = ''">
-              @for (content of filteredContentSignal(); track content) {
-                <mat-option [value]="content">{{content}}</mat-option>
-              }            
-            </mat-autocomplete>
+              <mat-option *ngFor="let content of filteredContent$ | async" [value]="content">
+                {{ content }}
+              </mat-option>
+            </mat-autocomplete>                     
           </mat-form-field>
+
+          <div>
+            <label>Nível: </label>
+            <mat-radio-group formControlName="nivel">
+              <mat-radio-button value="facil">Fácil</mat-radio-button>
+              <mat-radio-button value="medio">Médio</mat-radio-button>
+              <mat-radio-button value="dificil">Difícil</mat-radio-button>
+            </mat-radio-group>
+          </div>
         
-          <button class="btn-quiz">Gerar Quiz</button>
+          <button class="btn-quiz"
+          [disabled]="!quizForm.get('area')?.value"
+          >Gerar Quiz</button>
 
         </form>
     </section>
 
     <section class="sectionStatistics">
 
-      
+      <apx-chart
+        [series]="chartOptions.series"
+        [chart]="chartOptions.chart"
+        [xaxis]="chartOptions.xaxis"
+        [stroke]="chartOptions.stroke"
+        [fill]="chartOptions.fill"
+        [markers]="chartOptions.markers">
+      </apx-chart>
+
 
       <img src="/assets/images/statistics-illustration.png" alt="">
     </section>

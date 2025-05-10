@@ -1,42 +1,67 @@
 @import "../../../styles/variables.sass"
-  
+
 header
-  background-color: $primary-color;
-  padding: 18px 0;
+  background-color: $primary-color
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)
+  padding: 12px 0
 
   .navbar
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    color: white;
+    max-width: 1200px
+    margin: 0 auto
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding: 0 24px
 
   .logo
-    cursor: pointer;
-    
-  .logo img
-    height: 40px;
+    cursor: pointer
+
+    img
+      filter: drop-shadow(0 1px 2px rgb(0, 0, 0))
+      height: 44px
+      transition: transform 0.2s ease-in-out
+
+      &:hover
+        transform: scale(1.05)
 
   .nav-links
-    list-style: none;
-    display: flex;
-    gap: 20px;
+    list-style: none
+    display: flex
+    gap: 24px
+    margin: 0
+    padding: 0
 
     li a
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
+      cursor: pointer
+      color: white
+      text-decoration: none
+      font-weight: 600
+      font-size: 16px
+      padding: 8px 14px
+      border-radius: 6px
+      transition: background-color 0.2s, opacity 0.2s
 
-    li a.active
-      text-decoration: underline;
+      &:hover
+        background-color: lighten($primary-color, 5%)
+        opacity: 0.9
 
-    li a:hover
-      opacity: 0.8;
-      cursor: pointer;
+      &.active
+        background-color: darken($primary-color, 10%)
+        text-decoration: none
+
+      .profile-icon
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 8px;
+        vertical-align: middle;
 
 main
-  display: flex;
-  background-color: $gray-bg;
-  padding: 12px;
-  flex-direction: row;
-  gap: 50px
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  display: flex
+  background-color: $gray-bg
+  padding: 15px
+  flex-direction: row
+  gap: 30px
