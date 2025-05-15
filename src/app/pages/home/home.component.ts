@@ -55,6 +55,10 @@ export type ChartOptions = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
+  quiz(){
+    this.router.navigate(['quiz'])
+  }
+
   quizForm = new FormGroup({
     area: new FormControl('', { nonNullable: true }),
     conteudos: new FormControl<string[]>([], { nonNullable: true }),
