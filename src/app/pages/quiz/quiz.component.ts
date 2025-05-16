@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DefaultHomeComponent } from '../../components/default-home/default-home.component';
 import { PrimaryInputComponent } from '../../components/primary-input/primary-input.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-quiz',
@@ -22,5 +23,11 @@ export class QuizComponent {
 
   ngOnInit() {
     // You can add logic to start countdown, etc.
+  }
+
+  constructor(private router: Router) {}
+
+  home(){
+    this.router.navigate([''])
   }
 }
