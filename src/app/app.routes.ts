@@ -15,15 +15,15 @@ export const routes: Routes = [
         component: SignupComponent
     },
     {
-        path: 'home',
+        path: "",
         component: HomeComponent,
     },
     {
-        path: 'perfil',
+        path: "perfil",
         component: PerfilComponent,
     },
     {
-        path: '',
+        path: "quiz",
         component: QuizComponent,
     }
     
