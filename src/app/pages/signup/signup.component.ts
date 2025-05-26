@@ -3,12 +3,12 @@ import { DefaulLoginComponent } from '../../components/default-login/default-log
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PrimaryInputComponent } from '../../components/primary-input/primary-input.component';
 import { Router } from '@angular/router';
-import { LoginService } from '../../services/login.service';
+import { SignupService } from '../../services/signup.service';
 import { ToastrService } from 'ngx-toastr';
 
 interface signupForm {
-  name: FormControl,
   email: FormControl,
+  username: FormControl,
   password: FormControl,
   passwordConfirm: FormControl
 }
@@ -21,7 +21,7 @@ interface signupForm {
     PrimaryInputComponent
   ],
   providers: [
-    LoginService
+    SignupService
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.sass'
@@ -31,21 +31,43 @@ export class SignupComponent {
 
   constructor(
     private router: Router,
-    private loginService: LoginService,
+    private signupService: SignupService,
     private toastService: ToastrService
   ){
     this.signupForm = new FormGroup({
-      name: new FormControl('', [Validators.required, Validators.minLength(3)]),
       email: new FormControl('', [Validators.required, Validators.email]),
+      username: new FormControl('', [Validators.required, Validators.minLength(3)]),
       password: new FormControl('', [Validators.required, Validators.minLength(8)]),
       passwordConfirm: new FormControl('', [Validators.required, Validators.minLength(8)])
     })
   }
 
   submit(){
-    this.loginService.login(this.signupForm.value.email, this.signupForm.value.password).subscribe({
-      next: () => this.toastService.success("Login feito com sucesso!"),
-      error: () => this.toastService.error("Erro inesperado! Tente novamente mais tarde"),
+    this.signupService.signup(this.signupForm.value.username, this.signupForm.value.email, this.signupForm.value.password).subscribe({
+      next: () => {
+        this.toastService.success("Cadastro feito com sucesso!");
+        this.router.navigate(["login"]);
+      },
+      error: (err) => {
+        // Extrai as mensagens de erro do backend
+        let messages: string[] = [];
+
+        if (err?.error) {
+          for (const key in err.error) {
+            if (Array.isArray(err.error[key])) {
+              messages = messages.concat(err.error[key]);
+            }
+          }
+        }
+
+        // Se não tiver mensagens, exibe um erro genérico
+        if (messages.length === 0) {
+          messages.push("Erro ao tentar fazer cadastro");
+        }
+
+        // Mostra todas as mensagens concatenadas no toast
+        this.toastService.error(messages.join('\n'));
+      },
     })
   }
 
