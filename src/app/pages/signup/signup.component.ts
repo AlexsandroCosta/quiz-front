@@ -3,7 +3,7 @@ import { DefaulLoginComponent } from '../../components/default-login/default-log
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PrimaryInputComponent } from '../../components/primary-input/primary-input.component';
 import { Router } from '@angular/router';
-import { SignupService } from '../../services/signup.service';
+import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 
 interface signupForm {
@@ -21,7 +21,7 @@ interface signupForm {
     PrimaryInputComponent
   ],
   providers: [
-    SignupService
+    AuthService
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.sass'
@@ -31,7 +31,7 @@ export class SignupComponent {
 
   constructor(
     private router: Router,
-    private signupService: SignupService,
+    private authService: AuthService,
     private toastService: ToastrService
   ){
     this.signupForm = new FormGroup({
@@ -43,7 +43,7 @@ export class SignupComponent {
   }
 
   submit(){
-    this.signupService.signup(this.signupForm.value.username, this.signupForm.value.email, this.signupForm.value.password).subscribe({
+    this.authService.signup(this.signupForm.value.username, this.signupForm.value.email, this.signupForm.value.password).subscribe({
       next: () => {
         this.toastService.success("Cadastro feito com sucesso!");
         this.router.navigate(["login"]);
