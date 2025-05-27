@@ -3,8 +3,9 @@ import { DefaulLoginComponent } from '../../components/default-login/default-log
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PrimaryInputComponent } from '../../components/primary-input/primary-input.component';
 import { Router } from '@angular/router';
-import { LoginService } from '../../services/login.service';
+import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +15,8 @@ import { ToastrService } from 'ngx-toastr';
     PrimaryInputComponent
   ],
   providers: [
-    LoginService
+    AuthService,
+    UserService
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.sass'
@@ -24,7 +26,8 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private loginService: LoginService,
+    private authService: AuthService,
+    private userService: UserService,
     private toastService: ToastrService
   ){
     this.loginForm = new FormGroup({
@@ -34,11 +37,20 @@ export class LoginComponent {
   }
 
   submit(){
-    this.loginService.login(this.loginForm.value.username, this.loginForm.value.password).subscribe({
+    this.authService.login(this.loginForm.value.username, this.loginForm.value.password).subscribe({
       next: (response) => {
-        localStorage.setItem('token', response.token);
-        this.toastService.success("Login feito com sucesso!");
-        this.router.navigate([''])
+        localStorage.setItem('token', response.auth_token);
+        
+        this.userService.getUserInfo().subscribe({
+          next: (userInfo) => {
+            this.userService.setUser(userInfo);
+            this.toastService.success("Login feito com sucesso!");
+            this.router.navigate(['']);
+          },
+          error: () => {
+            this.toastService.error("Erro ao carregar dados do usuário.");
+          }
+        })
       },
       error: () => this.toastService.error("Erro ao tentar fazer login."),
     })
