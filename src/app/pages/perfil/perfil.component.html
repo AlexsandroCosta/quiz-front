@@ -6,7 +6,7 @@
             <img src="/assets/images/chad.jpg" alt="Imagem de perfil" class="profile-pic" />
             <input type="file" id="profile-pic" hidden />
           </label>
-          <p class="profile-name">Meu nome</p>
+          <p class="profile-name">{{ user?.username }}</p>
         </div>
   
         <div class="profile-fields">
@@ -15,7 +15,7 @@
             inputName="nome"
             type="text"
             label="Nome"
-            placeholder="Meu nome"
+            placeholder="{{ user?.username }}"
           >
             <img src="/assets/images/user-icon.png" alt="">
           </app-primary-input>
@@ -25,7 +25,7 @@
             inputName="email"
             type="email"
             label="Email"
-            placeholder="exemplo@email.com"
+            placeholder="{{ user?.email }}"
           >
             <img src="/assets/images/email-icon.svg" alt="">
           </app-primary-input>
@@ -35,6 +35,7 @@
             inputName="nova_senha"
             type="password"
             label="Nova senha"
+            placeholder = "********"
           >
             <img src="/assets/images/password-icon.svg" alt="">
           </app-primary-input>
@@ -44,6 +45,7 @@
             inputName="conf_senha"
             type="password"
             label="Confirmar senha"
+            placeholder = "********"
           >
             <img src="/assets/images/password-icon.svg" alt="">
           </app-primary-input>

@@ -1,16 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-default-home',
   imports: [],
+  providers: [
+    UserService
+  ],
   templateUrl: './default-home.component.html',
   styleUrl: './default-home.component.sass'
 })
-export class DefaultHomeComponent {
-  constructor(private router: Router, public authService: AuthService){}
+export class DefaultHomeComponent implements OnInit{
+  
+  constructor(
+    private router: Router, 
+    public authService: AuthService,
+    private userService: UserService,
+  ){}
 
+  user: any;
+
+  ngOnInit(): void {
+    this.user = this.userService.getUser();
+  }
+  
   inicio(){
     this.router.navigate([''])
   }
