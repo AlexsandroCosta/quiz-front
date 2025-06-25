@@ -24,6 +24,7 @@ import {
   ApexXAxis,
 } from 'ng-apexcharts';
 import { AreaConteudoService } from '../../services/area-conteudo.service';
+import { QuizService } from '../../services/quiz.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -52,16 +53,55 @@ export type ChartOptions = {
     NgApexchartsModule
   ],
   providers: [
-    AreaConteudoService
+    AreaConteudoService,
+    QuizService
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent implements OnInit{
-  quiz(){
-    this.router.navigate(['quiz'])
+  quiz() {
+    let { area, conteudos, nivel } = this.quizForm.value;
+
+    let areaId: number | undefined;
+
+    if (typeof area === 'object' && area !== null) {
+      areaId = area.id;
+    } else if (typeof area === 'string') {
+      areaId = Number(area);
+    }
+
+    if (typeof areaId !== 'number' || isNaN(areaId)) {
+      console.error('Área inválida');
+      return;
+    }
+
+    const conteudosIds: number[] = Array.isArray(conteudos)
+      ? conteudos.map((c: any) => (typeof c === 'object' && c !== null ? c.id : Number(c)))
+      : [];
+
+    if (typeof nivel !== 'string' || nivel.trim() === '') {
+      console.error('Nível inválido');
+      return;
+    }
+
+    const dados = {
+      area: areaId,
+      conteudos: conteudosIds,
+      nivel: nivel.trim(),
+    };
+
+    this.quizService.gerarQuiz(dados).subscribe({
+      next: (res) => {
+        console.log('Resposta do servidor:', res);
+      },
+      error: (err) => {
+        console.error('Erro ao gerar quiz:', err);
+      },
+    });
   }
+
 
   quizForm = new FormGroup({
     area: new FormControl<{ id: number, nome: string } | string>('', { nonNullable: true }),
@@ -80,18 +120,6 @@ export class HomeComponent implements OnInit{
   selectedContents = signal<{ id: number; nome: string; area: number }[]>([]);
   availableContents = signal<{ id: number; nome: string; area: number }[]>([]);
   
-  historico = [
-    { data: '2025-05-01', hora: '14:00', area: 'Matemática', pontos: 8 },
-    { data: '2025-05-02', hora: '10:30', area: 'Português', pontos: 6 },
-    { data: '2025-05-02', hora: '13:45', area: 'Química', pontos: 9 },
-    { data: '2025-05-03', hora: '09:15', area: 'Biologia', pontos: 7 },
-    { data: '2025-05-03', hora: '16:20', area: 'Física', pontos: 10 }
-  ].sort((a, b) => {
-    const dataA = new Date(`${a.data}T${a.hora}`);
-    const dataB = new Date(`${b.data}T${b.hora}`);
-    return dataB.getTime() - dataA.getTime(); // mais recentes primeiro
-  });
-
   ranking = [
     { posicao: 1, nome: 'Time Alpha', pontos: 45 },
     { posicao: 2, nome: 'Time Bravo', pontos: 42 },
@@ -172,10 +200,26 @@ export class HomeComponent implements OnInit{
 
   constructor(
     private router: Router,
-    private areaConteudoService: AreaConteudoService
+    private areaConteudoService: AreaConteudoService,
+    private quizService : QuizService
   ) {}
 
+  historico: any;
+
   ngOnInit(): void {
+    this.quizService.getHistorico().subscribe({
+      next: (data) => {
+        this.historico = data.map(item => ({
+          ...item,
+          criacao: new Date(item.criacao)
+        }));
+      },
+      error: (err) => {
+        console.error('Erro ao carregar histórico', err);
+        this.historico = [];
+      }
+    });
+    
     // Habilita/desabilita o FormControl e limpa chips ao trocar de área
     this.quizForm.controls.area.valueChanges.pipe(
       startWith('')

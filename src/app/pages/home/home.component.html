@@ -118,12 +118,15 @@
       <cdk-virtual-scroll-viewport itemSize="100" class="viewport">
         <div *cdkVirtualFor="let item of historico" class="item-card">
           <div class="item-header">
-            <span class="item-date">{{ item.data | date:'dd/MM/yyyy' }} {{ item.hora }}</span>
-            <span class="item-area">{{item.area}}</span>
+            <span class="item-date">{{ item.criacao | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="item-area">{{ item.area_nome }}</span>
           </div>
           <div class="item-footer">
-            <span class="item-label">Pontos:</span>
-            <span class="item-pontos">{{item.pontos}}</span>
+            <span class="item-label">Pontos:
+              <span class="item-pontos">{{ item.pontuacao }}</span>
+            </span>
+            
+            <span class="item-nivel">{{ item.nivel_display | titlecase }}</span>
           </div>
         </div>
       </cdk-virtual-scroll-viewport>
