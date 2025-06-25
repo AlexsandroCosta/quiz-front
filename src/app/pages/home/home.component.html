@@ -40,48 +40,43 @@
           <mat-form-field class="full-width" appearance="fill">
             <mat-label>Área de conhecimento</mat-label>
             <input type="text"
-                  aria-label="Área de conhecimento" 
+                  aria-label="Área de conhecimento"
                   matInput
-                  [formControl]="quizForm.controls.area"
+                  formControlName="area"
                   [matAutocomplete]="autoArea">
-            <mat-autocomplete #autoArea="matAutocomplete">
-              @for (option of filteredAreas | async; track option) {
-                <mat-option [value]="option">{{option}}</mat-option>
-              }
+            <mat-autocomplete #autoArea="matAutocomplete" [displayWith]="displayArea.bind(this)">
+              <mat-option *ngFor="let option of filteredAreas()" [value]="option">
+                {{ option.nome }}
+              </mat-option>
             </mat-autocomplete>
           </mat-form-field>
 
-
-          <mat-form-field class="chip-list">
+          <mat-form-field class="full-width" appearance="fill" *ngIf="quizForm.get('area')?.value && typeof quizForm.get('area')?.value === 'object'">
             <mat-label>Conteúdos</mat-label>
             <mat-chip-grid #chipGrid aria-label="Seleção de conteúdos">
-              @for (content of contents(); track $index) {
-                <mat-chip-row (removed)="remove(content)">
-                  {{content}}
-                  <button matChipRemove [attr.aria-label]="'remove ' + content">
-                    <mat-icon>cancel</mat-icon>
-                  </button>
-                </mat-chip-row>
-              }
+              <mat-chip-row 
+                *ngFor="let content of selectedContents()" 
+                (removed)="remove(content)"
+                removable="true">
+                {{content.nome}}
+                <mat-icon matChipRemove>cancel</mat-icon>
+              </mat-chip-row>
             </mat-chip-grid>
-            <input
-              name="currentContent"
-              placeholder="Adicionar conteúdo..."
+            <input 
+              placeholder="Digite para buscar conteúdos..."
               #contentInput
               [formControl]="currentContentControl"
               [matChipInputFor]="chipGrid"
               [matAutocomplete]="autoContent"
               [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-              (matChipInputTokenEnd)="addContent($event)"
-              [disabled]="!quizForm.get('area')?.value"
-            />
-            <mat-autocomplete #autoContent="matAutocomplete" (optionSelected)="selected($event); contentInput.value = ''">
+              (matChipInputTokenEnd)="addContent($event)" />
+            <mat-autocomplete #autoContent="matAutocomplete" (optionSelected)="selected($event)">
               <mat-option *ngFor="let content of filteredContent$ | async" [value]="content">
-                {{ content }}
+                {{content.nome}}
               </mat-option>
-            </mat-autocomplete>                     
+            </mat-autocomplete>
           </mat-form-field>
-
+          
           <div>
             <label>Nível: </label>
             <mat-radio-group formControlName="nivel">
