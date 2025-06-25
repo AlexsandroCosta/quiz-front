@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
-import { map, Observable, startWith } from 'rxjs';
+import { map, Observable, startWith, combineLatest } from 'rxjs';
 import { DefaultHomeComponent } from "../../components/default-home/default-home.component";
 import { NgApexchartsModule } from 'ng-apexcharts';
 import {
@@ -23,6 +23,8 @@ import {
   ApexMarkers,
   ApexXAxis,
 } from 'ng-apexcharts';
+import { AreaConteudoService } from '../../services/area-conteudo.service';
+import { QuizService } from '../../services/quiz.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -50,40 +52,74 @@ export type ChartOptions = {
     ScrollingModule,
     NgApexchartsModule
   ],
+  providers: [
+    AreaConteudoService,
+    QuizService
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent {
-  quiz(){
-    this.router.navigate(['quiz'])
+export class HomeComponent implements OnInit{
+  quiz() {
+    let { area, conteudos, nivel } = this.quizForm.value;
+
+    let areaId: number | undefined;
+
+    if (typeof area === 'object' && area !== null) {
+      areaId = area.id;
+    } else if (typeof area === 'string') {
+      areaId = Number(area);
+    }
+
+    if (typeof areaId !== 'number' || isNaN(areaId)) {
+      console.error('Área inválida');
+      return;
+    }
+
+    const conteudosIds: number[] = Array.isArray(conteudos)
+      ? conteudos.map((c: any) => (typeof c === 'object' && c !== null ? c.id : Number(c)))
+      : [];
+
+    if (typeof nivel !== 'string' || nivel.trim() === '') {
+      console.error('Nível inválido');
+      return;
+    }
+
+    const dados = {
+      area: areaId,
+      conteudos: conteudosIds,
+      nivel: nivel.trim(),
+    };
+
+    this.quizService.gerarQuiz(dados).subscribe({
+      next: (res) => {
+        console.log('Resposta do servidor:', res);
+      },
+      error: (err) => {
+        console.error('Erro ao gerar quiz:', err);
+      },
+    });
   }
 
+
   quizForm = new FormGroup({
-    area: new FormControl('', { nonNullable: true }),
-    conteudos: new FormControl<string[]>([], { nonNullable: true }),
+    area: new FormControl<{ id: number, nome: string } | string>('', { nonNullable: true }),
+    conteudos: new FormControl<{ id: number; nome: string; area: number }[]>([], { nonNullable: true }),
     nivel: new FormControl('facil'),
   });
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
   currentContentControl = new FormControl('');
-  contents = signal<string[]>([]);
+  contents = signal<{ id: number; nome: string; area: number }[]>([]);
   filteredContentSignal = signal<string[]>([]);
 
-  areaOptions: string[] = ['Matemática', 'Português', 'Química', 'Biologia', 'Física'].sort();
+  areaOptions = signal<{ id: number, nome: string }[]>([]);
+  areaSearchText = signal<string>('');
 
-  historico = [
-    { data: '2025-05-01', hora: '14:00', area: 'Matemática', pontos: 8 },
-    { data: '2025-05-02', hora: '10:30', area: 'Português', pontos: 6 },
-    { data: '2025-05-02', hora: '13:45', area: 'Química', pontos: 9 },
-    { data: '2025-05-03', hora: '09:15', area: 'Biologia', pontos: 7 },
-    { data: '2025-05-03', hora: '16:20', area: 'Física', pontos: 10 }
-  ].sort((a, b) => {
-    const dataA = new Date(`${a.data}T${a.hora}`);
-    const dataB = new Date(`${b.data}T${b.hora}`);
-    return dataB.getTime() - dataA.getTime(); // mais recentes primeiro
-  });
-
+  selectedContents = signal<{ id: number; nome: string; area: number }[]>([]);
+  availableContents = signal<{ id: number; nome: string; area: number }[]>([]);
+  
   ranking = [
     { posicao: 1, nome: 'Time Alpha', pontos: 45 },
     { posicao: 2, nome: 'Time Bravo', pontos: 42 },
@@ -133,96 +169,154 @@ export class HomeComponent {
       colors: ['#fea3b2']
     },
   };
-  
 
-  // Define um Observable para áreas filtradas
-  filteredAreas: Observable<string[]> = this.quizForm.controls.area.valueChanges.pipe(
-    startWith(''),
-    map(value => value ? this._filterAreas(value) : this.areaOptions)
-  );
+  contentsApi = signal<{ id: number; nome: string; area: number }[]>([]);
   
-  // Define os conteúdos disponíveis para cada área
-  allContents: Record<string, string[]> = {
-    Matemática: ['Álgebra', 'Geometria', 'Trigonometria'],
-    Português: ['Gramática', 'Literatura', 'Interpretação'],
-    Química: ['Orgânica', 'Inorgânica', 'Físico-Química'],
-    Biologia: ['Citologia', 'Genética', 'Ecologia'],
-    Física: ['Mecânica', 'Termologia', 'Óptica']
-  };
+  // Define um Observable para áreas filtradas
+  filteredAreas = computed(() => {
+    const searchText = this.areaSearchText().toLowerCase();
+    return this.areaOptions().filter(option =>
+      option.nome.toLowerCase().includes(searchText)
+    );
+  });
+
+  contentSearchText = signal<string>('');
 
   // Observable para conteúdos filtrados
-  filteredContent$: Observable<string[]> = this.quizForm.valueChanges.pipe(
-    startWith(this.quizForm.value), // Inicia com os valores atuais do formulário
-    map(() => {
-      const area = this.quizForm.get('area')?.value;
-      const currentInput = this.currentContentControl.value?.toLowerCase() ?? '';
+  // Atualize o filteredContent$ para filtrar a partir de contentsFromApi
+  filteredContent$: Observable<{ id: number; nome: string; area: number }[]> = 
+    this.currentContentControl.valueChanges.pipe(
+      startWith(''),
+      map(input => {
+        const filterValue = (typeof input === 'string' ? input.toLowerCase() : '');
+        const selected = this.selectedContents();
+        return this.availableContents()
+          .filter(c => c.nome.toLowerCase().includes(filterValue))
+          .filter(c => !selected.some(s => s.id === c.id)); // Remove os já selecionados
+      })
+    );
 
-      if (!area || !this.allContents[area]) return [];
-      const areaContents = this.allContents[area];
-      
-      return currentInput
-        ? areaContents.filter(c => c.toLowerCase().includes(currentInput))
-        : areaContents;
-    })
-  );
-  
   announcer = inject(LiveAnnouncer);
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private areaConteudoService: AreaConteudoService,
+    private quizService : QuizService
+  ) {}
+
+  historico: any;
 
   ngOnInit(): void {
+    this.quizService.getHistorico().subscribe({
+      next: (data) => {
+        this.historico = data.map(item => ({
+          ...item,
+          criacao: new Date(item.criacao)
+        }));
+      },
+      error: (err) => {
+        console.error('Erro ao carregar histórico', err);
+        this.historico = [];
+      }
+    });
+    
     // Habilita/desabilita o FormControl e limpa chips ao trocar de área
-    this.quizForm.get('area')!.valueChanges.subscribe(area => {
-      // limpa os conteúdos selecionados
-      this.contents.set([]); // Limpa a lista de conteúdos selecionados
+    this.quizForm.controls.area.valueChanges.pipe(
+      startWith('')
+    ).subscribe(value => {
+      const searchText = typeof value === 'string' ? value : '';
+      this.areaSearchText.set(searchText);
+    });
 
-      if (area) {
+    // PRINCIPAL MUDANÇA: Reset completo quando área é alterada
+    this.quizForm.get('area')!.valueChanges.subscribe(area => {
+      // Reset dos conteúdos selecionados
+      this.selectedContents.set([]);
+      this.quizForm.controls.conteudos.setValue([]);
+      
+      // Limpa o input de conteúdo
+      this.currentContentControl.setValue('');
+      
+      if (typeof area === 'object' && area !== null) {
         this.currentContentControl.enable({ emitEvent: false });
+
+        // Carrega novos conteúdos da área selecionada
+        this.areaConteudoService.getConteudos(area.id).subscribe({
+          next: (conteudos) => {
+            const objs = conteudos.map(c => ({
+              id: c.id,
+              nome: c.nome,
+              area: area.id
+            }));
+            this.availableContents.set(objs);
+          },
+          error: () => {
+            console.error('Erro ao carregar conteúdos da área selecionada');
+            this.availableContents.set([]);
+          }
+        });
       } else {
         this.currentContentControl.disable({ emitEvent: false });
+        this.availableContents.set([]);
       }
     });
 
     // Inicialmente, como área começa vazia, já desabilita
     this.currentContentControl.disable({ emitEvent: false });
-  }
 
-  // Filtro para as áreas
-  private _filterAreas(value: string): string[] {
-    const filterValue = value.toLowerCase();
-    return this.areaOptions.filter(option => option.toLowerCase().includes(filterValue));
-  }
-
-  addContent(event: MatChipInputEvent): void {
-    const area = this.quizForm.get('area')?.value;
-    if (!area) return;
-    const value = (event.value || '').trim();
-  
-    if (value && !this.contents().includes(value)) {
-      this.contents.update(contents => [...contents, value]);
-    }
-  }
-
-  remove(content: string): void {
-    this.contents.update(contents => {
-      const index = contents.indexOf(content);
-      if (index < 0) return contents;
-      contents.splice(index, 1);
-      this.announcer.announce(`Removed ${content}`);
-      return [...contents];
+    this.areaConteudoService.getAreas().subscribe({
+      next: (areas) => {
+        this.areaOptions.set(areas.sort((a, b) => a.nome.localeCompare(b.nome)));
+      },
+      error: () => {
+        console.error('Erro ao carregar áreas da API');
+      }
     });
   }
 
-  selected(event: MatAutocompleteSelectedEvent): void {
-  const area = this.quizForm.get('area')?.value;
-  if (!area) return;
-  const selectedValue = event.option.viewValue;
-
-  if (!this.contents().includes(selectedValue)) {
-    this.contents.update(contents => [...contents, selectedValue]);
+  // Filtro para as áreas
+  private _filterAreas(value: string): { id: number, nome: string }[] {
+    const filterValue = value.toLowerCase();
+    return this.areaOptions().filter(option => option.nome.toLowerCase().includes(filterValue));
   }
 
-  event.option.deselect(); // opcional, dependendo do comportamento desejado
-}
+  displayArea(area: { id: number, nome: string } | string): string {
+    return typeof area === 'string' ? area : area?.nome;
+  }
 
+  addContent(event: MatChipInputEvent): void {
+    // Se você ainda quiser permitir texto livre, crie um objeto "fantasma"
+    const value = (event.value || '').trim();
+    if (value) {
+      const newObj = { id: 0, nome: value, area: 0 };
+      this._addContentToSelection(newObj);
+    }
+    event.chipInput!.clear();
+    this.currentContentControl.setValue('');
+  }
+
+  remove(content: { id: number; nome: string; area: number }): void {
+    const updatedContents = this.selectedContents().filter(c => c.id !== content.id || c.nome !== content.nome);
+    this.selectedContents.set(updatedContents);
+    this.quizForm.controls.conteudos.setValue(updatedContents);
+    this.announcer.announce(`Removed ${content.nome}`);
+  }
+
+  selected(event: MatAutocompleteSelectedEvent): void {
+    const obj = event.option.value as { id: number; nome: string; area: number };
+    this._addContentToSelection(obj);
+    // limpa o input visual
+    this.currentContentControl.setValue('');
+  }
+
+  private _addContentToSelection(obj: { id: number; nome: string; area: number }) {
+    const currentSelected = this.selectedContents();
+    
+    // Verifica se já não está selecionado
+    if (!currentSelected.some(c => c.id === obj.id && c.nome === obj.nome)) {
+      const updatedContents = [...currentSelected, obj];
+      this.selectedContents.set(updatedContents);
+      this.quizForm.controls.conteudos.setValue(updatedContents);
+    }
+  }
 }

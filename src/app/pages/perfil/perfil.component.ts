@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { DefaultHomeComponent } from '../../components/default-home/default-home.component';
 import { PrimaryInputComponent } from '../../components/primary-input/primary-input.component';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-perfil',
@@ -9,6 +10,9 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
     DefaultHomeComponent,
     PrimaryInputComponent,
     ReactiveFormsModule
+  ],
+  providers: [
+    UserService
   ],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.sass'
@@ -20,4 +24,14 @@ export class PerfilComponent {
     nova_senha: new FormControl(''),
     conf_senha: new FormControl('')
   });
+
+  constructor(
+    private userService: UserService,
+  ){}
+
+  user: any;
+
+  ngOnInit(): void {
+    this.user = this.userService.getUser();
+  }
 }
