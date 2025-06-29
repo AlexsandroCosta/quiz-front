@@ -25,6 +25,7 @@ import {
 } from 'ng-apexcharts';
 import { AreaConteudoService } from '../../services/area-conteudo.service';
 import { QuizService } from '../../services/quiz.service';
+import { RankingService, RankingEntry } from '../../services/ranking.service';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -54,7 +55,8 @@ export type ChartOptions = {
   ],
   providers: [
     AreaConteudoService,
-    QuizService
+    QuizService,
+    RankingService
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.sass'],
@@ -120,18 +122,7 @@ export class HomeComponent implements OnInit{
   selectedContents = signal<{ id: number; nome: string; area: number }[]>([]);
   availableContents = signal<{ id: number; nome: string; area: number }[]>([]);
   
-  ranking = [
-    { posicao: 1, nome: 'Time Alpha', pontos: 45 },
-    { posicao: 2, nome: 'Time Bravo', pontos: 42 },
-    { posicao: 3, nome: 'Time Charlie', pontos: 40 },
-    { posicao: 4, nome: 'Time Delta', pontos: 38 },
-    { posicao: 5, nome: 'Time Echo', pontos: 36 },
-    { posicao: 6, nome: 'Time Foxtrot', pontos: 34 },
-    { posicao: 7, nome: 'Time Golf', pontos: 32 },
-    { posicao: 8, nome: 'Time Hotel', pontos: 30 },
-    { posicao: 9, nome: 'Time India', pontos: 28 },
-    { posicao: 10, nome: 'Time Juliett', pontos: 26 }
-  ];
+  ranking: Array<{ posicao: number; nome: string; pontos: number }> = [];
 
   public chartOptions: ChartOptions = {
     series: [
@@ -172,7 +163,6 @@ export class HomeComponent implements OnInit{
 
   contentsApi = signal<{ id: number; nome: string; area: number }[]>([]);
   
-  // Define um Observable para áreas filtradas
   filteredAreas = computed(() => {
     const searchText = this.areaSearchText().toLowerCase();
     return this.areaOptions().filter(option =>
@@ -182,8 +172,6 @@ export class HomeComponent implements OnInit{
 
   contentSearchText = signal<string>('');
 
-  // Observable para conteúdos filtrados
-  // Atualize o filteredContent$ para filtrar a partir de contentsFromApi
   filteredContent$: Observable<{ id: number; nome: string; area: number }[]> = 
     this.currentContentControl.valueChanges.pipe(
       startWith(''),
@@ -192,7 +180,7 @@ export class HomeComponent implements OnInit{
         const selected = this.selectedContents();
         return this.availableContents()
           .filter(c => c.nome.toLowerCase().includes(filterValue))
-          .filter(c => !selected.some(s => s.id === c.id)); // Remove os já selecionados
+          .filter(c => !selected.some(s => s.id === c.id)); 
       })
     );
 
@@ -201,7 +189,8 @@ export class HomeComponent implements OnInit{
   constructor(
     private router: Router,
     private areaConteudoService: AreaConteudoService,
-    private quizService : QuizService
+    private quizService : QuizService,
+    private rankingService: RankingService
   ) {}
 
   historico: any;
@@ -220,7 +209,6 @@ export class HomeComponent implements OnInit{
       }
     });
     
-    // Habilita/desabilita o FormControl e limpa chips ao trocar de área
     this.quizForm.controls.area.valueChanges.pipe(
       startWith('')
     ).subscribe(value => {
@@ -228,19 +216,13 @@ export class HomeComponent implements OnInit{
       this.areaSearchText.set(searchText);
     });
 
-    // PRINCIPAL MUDANÇA: Reset completo quando área é alterada
     this.quizForm.get('area')!.valueChanges.subscribe(area => {
-      // Reset dos conteúdos selecionados
       this.selectedContents.set([]);
       this.quizForm.controls.conteudos.setValue([]);
-      
-      // Limpa o input de conteúdo
       this.currentContentControl.setValue('');
       
       if (typeof area === 'object' && area !== null) {
         this.currentContentControl.enable({ emitEvent: false });
-
-        // Carrega novos conteúdos da área selecionada
         this.areaConteudoService.getConteudos(area.id).subscribe({
           next: (conteudos) => {
             const objs = conteudos.map(c => ({
@@ -261,7 +243,6 @@ export class HomeComponent implements OnInit{
       }
     });
 
-    // Inicialmente, como área começa vazia, já desabilita
     this.currentContentControl.disable({ emitEvent: false });
 
     this.areaConteudoService.getAreas().subscribe({
@@ -272,20 +253,38 @@ export class HomeComponent implements OnInit{
         console.error('Erro ao carregar áreas da API');
       }
     });
+
+    // *** NOVO: carregar ranking do backend ***
+    this.rankingService.getRanking().subscribe({
+      next: (data: RankingEntry[]) => {
+        this.ranking = data
+          .sort((a, b) => b.pontuacao - a.pontuacao)
+          .slice(0, 10)
+          .map((entry, index) => ({
+            posicao: index + 1,
+            nome: entry.usuario,
+            pontos: entry.pontuacao
+          }));
+      },
+      error: (err) => {
+        console.error('Erro ao carregar ranking', err);
+        this.ranking = [];
+      }
+    });
   }
 
-  // Filtro para as áreas
-  private _filterAreas(value: string): { id: number, nome: string }[] {
-    const filterValue = value.toLowerCase();
-    return this.areaOptions().filter(option => option.nome.toLowerCase().includes(filterValue));
-  }
-
-  displayArea(area: { id: number, nome: string } | string): string {
-    return typeof area === 'string' ? area : area?.nome;
+  // métodos para manipular conteúdo e seleção seguem iguais...
+  private _addContentToSelection(obj: { id: number; nome: string; area: number }) {
+    const currentSelected = this.selectedContents();
+    
+    if (!currentSelected.some(c => c.id === obj.id && c.nome === obj.nome)) {
+      const updatedContents = [...currentSelected, obj];
+      this.selectedContents.set(updatedContents);
+      this.quizForm.controls.conteudos.setValue(updatedContents);
+    }
   }
 
   addContent(event: MatChipInputEvent): void {
-    // Se você ainda quiser permitir texto livre, crie um objeto "fantasma"
     const value = (event.value || '').trim();
     if (value) {
       const newObj = { id: 0, nome: value, area: 0 };
@@ -305,18 +304,10 @@ export class HomeComponent implements OnInit{
   selected(event: MatAutocompleteSelectedEvent): void {
     const obj = event.option.value as { id: number; nome: string; area: number };
     this._addContentToSelection(obj);
-    // limpa o input visual
     this.currentContentControl.setValue('');
   }
 
-  private _addContentToSelection(obj: { id: number; nome: string; area: number }) {
-    const currentSelected = this.selectedContents();
-    
-    // Verifica se já não está selecionado
-    if (!currentSelected.some(c => c.id === obj.id && c.nome === obj.nome)) {
-      const updatedContents = [...currentSelected, obj];
-      this.selectedContents.set(updatedContents);
-      this.quizForm.controls.conteudos.setValue(updatedContents);
-    }
+  displayArea(area: { id: number, nome: string } | string): string {
+    return typeof area === 'string' ? area : area?.nome;
   }
 }
