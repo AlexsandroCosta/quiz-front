@@ -1,12 +1,12 @@
 <app-default-home>
   
-  <section class="ranking">
+    <section class="ranking">
     <img src="/assets/images/ranking-illustration.png" alt="">
     <h2>RANKING</h2>
-  
-    <ng-container *ngIf="ranking.length > 0; else semRanking">
+
+    <ng-container *ngIf="ranking().length > 0; else semRanking">
       <cdk-virtual-scroll-viewport itemSize="80" class="ranking-list-viewport">
-        <div *cdkVirtualFor="let team of ranking" class="ranking-card">
+        <div *cdkVirtualFor="let team of ranking()" class="ranking-card">
           <div class="ranking-icon">
             <ng-container [ngSwitch]="team.posicao">
               <span *ngSwitchCase="1" class="medal gold">🥇</span>
@@ -22,14 +22,13 @@
         </div>
       </cdk-virtual-scroll-viewport>
     </ng-container>
-    
+
     <ng-template #semRanking>
       <div class="mensagem-vazia">
         Nenhum ranking disponível.
       </div>
     </ng-template>
-    
-  </section>  
+  </section>
 
   <div class="mid">
 

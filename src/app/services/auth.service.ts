@@ -7,7 +7,6 @@ import { UserService } from './user.service';
 @Injectable({
   providedIn: 'root'
 })
-
 export class AuthService {
 
   constructor(
@@ -20,17 +19,18 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  signup(username: string, email: string, password: string){
+  signup(username: string, email: string, password: string) {
     const body = {
       username: username,
       email: email,
-      password: password
+      password: password,
+      re_password: password   // <-- Added this line to fix signup
     };
 
     return this.httpClient.post('http://127.0.0.1:8000/api/users/', body);
   }
 
-  login(username: string, password: string){
+  login(username: string, password: string) {
     const body = {
       username: username,
       password: password

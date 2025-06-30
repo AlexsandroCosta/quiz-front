@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface RankingEntry {
-  usuario: string;
+  nome: string;
   pontuacao: number;
 }
 
@@ -11,7 +11,7 @@ export interface RankingEntry {
   providedIn: 'root'
 })
 export class RankingService {
-  private apiUrl = 'http://127.0.0.1:8000/api/ranking/';
+  private apiUrl = 'http://127.0.0.1:8000/api/informacoes/ranking/';
 
   constructor(private httpClient: HttpClient) {}
 
