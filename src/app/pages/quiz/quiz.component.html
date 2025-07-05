@@ -1,7 +1,7 @@
 <app-default-home> 
     <div class="left-box">
-        <div class="quiz-title">{{ quizName }}</div>
-        <div class="quiz-topic">{{ topic }}</div>
+        <div class="quiz-title">{{ quiz.area_nome }}</div>
+        <div class="quiz-nivel">{{ quiz.nivel_display }}</div>
 
         <div class="timer">
             <span>Cronômetro</span>
@@ -11,8 +11,6 @@
         <div class="score-box">
             <div><strong>Pontuação:</strong></div>
             <div>{{ score | number: '5.000' }}</div>
-            <div><strong>Sequência:</strong></div>
-            <div>{{ combo }}</div>
         </div>
 
         <div class="question-count">
@@ -25,30 +23,37 @@
             <div>{{ correctAnswers }}</div>
         </div>
 
-        <button (click)="home()" class="quit-button">Abandonar Quiz</button>
+        <button (click)="abandonar()" class="quit-button">Abandonar Quiz</button>
     </div>
 
         <!-- question.component.html -->
-    <div class="question-container">
-        <div class="question-box">
+    <div class="question-container" *ngIf="quiz.conteudos.length > 0">
+        <div class="question-box" *ngIf="currentPergunta">
+
+            <!-- Cabeçalho da pergunta -->
             <div class="question-card">
-                <div class="question-header">
-                    <span class="points">1000 PTS</span>
-                    <span class="combo">1x</span>
-                </div>
-                <div class="question-text">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
-                </div>
+            <div class="question-header">
+                <span class="conteudo">{{ currentConteudo.conteudo_nome }}</span>
             </div>
 
+            <!-- Texto da pergunta -->
+            <div class="question-text">
+                {{ currentPergunta.pergunta }}
+            </div>
+            </div>
+
+            <!-- Botões de resposta -->
             <div class="options">
-                <button class="option option-a">Opção A</button>
-                <button class="option option-c">Opção B</button>
-                <button class="option option-b">Opção C</button>
-                <button class="option option-d">Opção D</button>
+            <button 
+                *ngFor="let resposta of currentPergunta.respostas"
+                (click)="responder(resposta)"
+                class="option">
+                {{ resposta.resposta }}
+            </button>
             </div>
         </div>
     </div>
+
 
 </app-default-home>
 

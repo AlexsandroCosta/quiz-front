@@ -94,7 +94,8 @@ export class HomeComponent implements OnInit{
 
     this.quizService.gerarQuiz(dados).subscribe({
       next: (res) => {
-        console.log('Resposta do servidor:', res);
+        this.quizService.setQuiz(res);
+        this.router.navigate(['/quiz'])
       },
       error: (err) => {
         console.error('Erro ao gerar quiz:', err);
