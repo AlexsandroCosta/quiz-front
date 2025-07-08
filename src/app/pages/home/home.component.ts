@@ -121,18 +121,7 @@ export class HomeComponent implements OnInit{
   selectedContents = signal<{ id: number; nome: string; area: number }[]>([]);
   availableContents = signal<{ id: number; nome: string; area: number }[]>([]);
   
-  ranking = [
-    { posicao: 1, nome: 'Time Alpha', pontos: 45 },
-    { posicao: 2, nome: 'Time Bravo', pontos: 42 },
-    { posicao: 3, nome: 'Time Charlie', pontos: 40 },
-    { posicao: 4, nome: 'Time Delta', pontos: 38 },
-    { posicao: 5, nome: 'Time Echo', pontos: 36 },
-    { posicao: 6, nome: 'Time Foxtrot', pontos: 34 },
-    { posicao: 7, nome: 'Time Golf', pontos: 32 },
-    { posicao: 8, nome: 'Time Hotel', pontos: 30 },
-    { posicao: 9, nome: 'Time India', pontos: 28 },
-    { posicao: 10, nome: 'Time Juliett', pontos: 26 }
-  ];
+  ranking = signal<{ posicao: number; nome: string; pontos: number }[]>([]);
 
   public chartOptions: ChartOptions = {
     series: [
@@ -271,6 +260,23 @@ export class HomeComponent implements OnInit{
       },
       error: () => {
         console.error('Erro ao carregar áreas da API');
+      }
+    });
+
+    this.quizService.getRanking().subscribe({
+      next: (data) => {
+        const rankingOrdenado = data
+          .sort((a, b) => b.pontuacao - a.pontuacao) // maior pontuação primeiro
+          .map((item, index) => ({
+            posicao: index + 1,
+            nome: item.nome_usuario,
+            pontos: item.pontuacao
+          }));
+        this.ranking.set(rankingOrdenado);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar ranking:', err);
+        this.ranking.set([]);
       }
     });
   }
