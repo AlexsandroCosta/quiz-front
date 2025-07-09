@@ -10,7 +10,7 @@
 
         <div class="score-box">
             <div><strong>Pontuação:</strong></div>
-            <div>{{ score | number: '5.000' }}</div>
+            <div>{{ score }}</div>
         </div>
 
         <div class="question-count">
@@ -53,6 +53,16 @@
             </div>
         </div>
     </div>
+
+    <div class="modal-overlay" *ngIf="quizFinalizado">
+        <div class="modal-content">
+            <h2>Quiz Finalizado</h2>
+            <p>{{ resultadoFinal | json }}</p>
+            <p><strong>Sua Pontuação:</strong> {{ score }}</p>
+            <button (click)="abandonar()">Sair</button>
+        </div>
+    </div>
+
 
 
 </app-default-home>
