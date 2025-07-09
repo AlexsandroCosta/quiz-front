@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { Quiz } from '../../types/quiz.type';
 import { QuizService } from '../../services/quiz.service';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
+import { interval, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-quiz',
@@ -20,11 +22,55 @@ export class QuizComponent {
 
   quizName = 'Nome do Quiz';
   topic = 'Tópico';
-  timerDisplay = '10:00'; // Placeholder for timer
   score = 0;
   currentQuestion = 0;
   totalQuestions = 10;
   correctAnswers = 0;
+  resultadoFinal: any = null;
+  quizFinalizado = false;
+
+  timer!: Subscription;
+  timeLeft: number = 10;
+
+  get timerDisplay(): string {
+    const min = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+    const sec = (this.timeLeft % 60).toString().padStart(2, '0');
+    return `${min}:${sec}`;
+  }
+
+  iniciarTimer() {
+    this.resetTimer();
+
+    const nivel = this.quiz?.nivel;
+    switch (nivel) {
+      case 'facil':
+        this.timeLeft = 10;
+        break;
+      case 'medio':
+        this.timeLeft = 20;
+        break;
+      case 'dificil':
+        this.timeLeft = 30;
+        break;
+      default:
+        this.timeLeft = 10;
+    }
+
+    this.timer = interval(1000).subscribe(() => {
+      this.timeLeft--;
+
+      if (this.timeLeft <= 0) {
+        this.timer.unsubscribe();
+        this.avancar();
+      }
+    });
+  }
+
+  resetTimer() {
+    if (this.timer) {
+      this.timer.unsubscribe();
+    }
+  }
 
   ngOnInit() {
     this.quiz = this.quizService.getQuiz();
@@ -33,7 +79,8 @@ export class QuizComponent {
       // Se não tiver nada no serviço nem no localStorage
       this.router.navigate(['/home']);
     }
-    
+
+    this.iniciarTimer();
   }
 
   constructor(
@@ -54,6 +101,7 @@ export class QuizComponent {
   }
  
   responder(resposta: { id: number; resposta: string; correta: boolean }) {
+    this.resetTimer();
     const id_pergunta = this.currentPergunta?.quizPergunta_id;
 
     if (id_pergunta != null) {
@@ -63,9 +111,28 @@ export class QuizComponent {
       });
     }
 
+    const nivel = this.quiz?.nivel;
+    let pontos = 0;
+
+    switch (nivel) {
+      case 'facil':
+        pontos = 1;
+        break;
+      case 'medio':
+        pontos = 2;
+        break;
+      case 'dificil':
+        pontos = 3;
+        break;
+      default:
+        pontos = 1; 
+    }
+
     if (resposta.correta) {
-      this.score += 1000;
+      this.score += pontos;
       this.correctAnswers++;
+    } else {
+      this.score -= pontos;
     }
 
     this.avancar();
@@ -86,8 +153,10 @@ export class QuizComponent {
         this.quizService.responderQuiz(quizId, this.respostasUsuario).subscribe({
           next: (res) => {
             this.toastService.success('Quiz respondido com sucesso!');
+            this.resultadoFinal = res;
+            this.quizFinalizado = true;
             this.quizService.clearQuiz();
-            this.router.navigate(['']);
+            this.resetTimer();
           },
           error: (err) => {
             this.toastService.error('Erro ao enviar respostas do quiz.');
@@ -101,9 +170,11 @@ export class QuizComponent {
     }
 
     this.currentQuestion++;
+    this.iniciarTimer();
   }
 
   abandonar(){
+    this.resetTimer();
     this.quizService.clearQuiz();
     this.router.navigate([''])
   }

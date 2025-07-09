@@ -54,6 +54,9 @@ export class QuizService {
     return this.httpClient.put(`http://127.0.0.1:8000/api/quiz/${quizId}/`, respostas , { headers });
   }
 
+  getRanking(){
+    return this.httpClient.get<{ id: number; usuario: number; nome_usuario: string; pontuacao: number }[]>('http://127.0.0.1:8000/api/informacoes/ranking/')
+  }
 
   getHistorico(): Observable<Quiz[]> {
     const headers = new HttpHeaders({
