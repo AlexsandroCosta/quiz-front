@@ -54,16 +54,10 @@
         </div>
     </div>
 
-    <div class="modal-overlay" *ngIf="quizFinalizado">
-        <div class="modal-content">
-            <h2>Quiz Finalizado</h2>
-            <p>{{ resultadoFinal | json }}</p>
-            <p><strong>Sua Pontuação:</strong> {{ score }}</p>
-            <button (click)="abandonar()">Sair</button>
-        </div>
+    <div class="loading-overlay" *ngIf="carregandoEnvio">
+        <div class="spinner"></div>
+        <p>Enviando suas respostas...</p>
     </div>
-
-
 
 </app-default-home>
 

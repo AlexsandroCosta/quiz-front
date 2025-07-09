@@ -27,10 +27,11 @@ export class QuizComponent {
   totalQuestions = 10;
   correctAnswers = 0;
   resultadoFinal: any = null;
-  quizFinalizado = false;
 
   timer!: Subscription;
   timeLeft: number = 10;
+
+  carregandoEnvio = false;
 
   get timerDisplay(): string {
     const min = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
@@ -149,14 +150,14 @@ export class QuizComponent {
     if (!this.currentPergunta) {
       const quizId = this.quiz?.id;
       if (quizId) {
-        console.log(this.respostasUsuario)
+        this.carregandoEnvio = true;
         this.quizService.responderQuiz(quizId, this.respostasUsuario).subscribe({
           next: (res) => {
             this.toastService.success('Quiz respondido com sucesso!');
-            this.resultadoFinal = res;
-            this.quizFinalizado = true;
             this.quizService.clearQuiz();
             this.resetTimer();
+            this.carregandoEnvio = false;
+            this.router.navigate([''])
           },
           error: (err) => {
             this.toastService.error('Erro ao enviar respostas do quiz.');
@@ -164,6 +165,7 @@ export class QuizComponent {
         });
       } else {
         this.toastService.error('Erro ao enviar respostas do quiz.');
+        this.carregandoEnvio = false;
       }
 
       return;
