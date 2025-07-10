@@ -138,10 +138,10 @@ export class HomeComponent implements OnInit{
       },
     },
     xaxis: {
-      categories: ["Matemática", "Português", "Química", "Biologia", "Física", "Artes"],
+      categories: [],
       labels: {
         style: {
-          colors: ['#555555', '#555555','#555555','#555555','#555555','#555555'], 
+          colors: [], 
           fontSize: '14px'
         }
       },
@@ -203,6 +203,49 @@ export class HomeComponent implements OnInit{
           ...item,
           criacao: new Date(item.criacao)
         }));
+
+        const areaPontosMap = new Map<string, number>();
+
+        for (const item of this.historico) {
+          const area = item.area_nome ?? 'Desconhecida';
+          const pontos = item.pontos ?? 0;
+
+          if (!areaPontosMap.has(area)) {
+            areaPontosMap.set(area, pontos);
+          } else {
+            areaPontosMap.set(area, areaPontosMap.get(area)! + pontos);
+          }
+        }
+
+        const categorias = Array.from(areaPontosMap.keys());
+        const labelColors = categorias.map(() => '#555555');
+        const pontosPorArea = Array.from(areaPontosMap.values());
+
+        console.log(categorias)
+        console.log(pontosPorArea)
+
+        this.chartOptions = {
+          ...this.chartOptions,
+          xaxis: {
+            ...this.chartOptions.xaxis,
+            categories: categorias,
+            labels: {
+              ...this.chartOptions.xaxis.labels,
+              style: {
+                ...this.chartOptions.xaxis.labels?.style,
+                colors: labelColors
+              }
+            }
+          },
+          series: [
+            {
+              name: "Total de pontos",
+              data: pontosPorArea
+            }
+          ]
+        };
+
+
       },
       error: (err) => {
         console.error('Erro ao carregar histórico', err);

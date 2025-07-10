@@ -97,17 +97,25 @@
 
     <section class="sectionStatistics">
 
-      <apx-chart
-        [series]="chartOptions.series"
-        [chart]="chartOptions.chart"
-        [xaxis]="chartOptions.xaxis"
-        [stroke]="chartOptions.stroke"
-        [fill]="chartOptions.fill"
-        [markers]="chartOptions.markers">
-      </apx-chart>
+      <ng-container *ngIf="chartOptions.series[0].data.length > 0; else noData">
+        <apx-chart
+          [series]="chartOptions.series"
+          [chart]="chartOptions.chart"
+          [xaxis]="chartOptions.xaxis"
+          [stroke]="chartOptions.stroke"
+          [fill]="chartOptions.fill"
+          [markers]="chartOptions.markers">
+        </apx-chart>
+      </ng-container>
 
+      <ng-template #noData>
+        <div class="no-data">
+          <p>Nenhum dado disponível para exibir.</p>
+        </div>
+      </ng-template>
 
       <img src="/assets/images/statistics-illustration.png" alt="">
+
     </section>
 
   </div>
