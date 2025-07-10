@@ -27,15 +27,27 @@ export class QuizComponent {
   totalQuestions = 10;
   correctAnswers = 0;
   resultadoFinal: any = null;
-  quizFinalizado = false;
 
   timer!: Subscription;
   timeLeft: number = 10;
+
+  carregandoEnvio = false;
+
+  shuffledRespostas: { id: number; resposta: string; correta: boolean }[] = [];
 
   get timerDisplay(): string {
     const min = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
     const sec = (this.timeLeft % 60).toString().padStart(2, '0');
     return `${min}:${sec}`;
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
   iniciarTimer() {
@@ -72,6 +84,11 @@ export class QuizComponent {
     }
   }
 
+  private loadShuffledRespostas() {
+    const respostas = this.currentPergunta?.respostas || [];
+    this.shuffledRespostas = this.shuffleArray(respostas);
+  }
+
   ngOnInit() {
     this.quiz = this.quizService.getQuiz();
     
@@ -79,7 +96,7 @@ export class QuizComponent {
       // Se não tiver nada no serviço nem no localStorage
       this.router.navigate(['/home']);
     }
-
+    this.loadShuffledRespostas();
     this.iniciarTimer();
   }
 
@@ -146,17 +163,21 @@ export class QuizComponent {
       this.currentPerguntaIndex = 0;
     }
 
-    if (!this.currentPergunta) {
+    if (this.currentPergunta) {
+      this.currentQuestion++;
+      this.loadShuffledRespostas();
+      this.iniciarTimer();
+    } else {
       const quizId = this.quiz?.id;
       if (quizId) {
-        console.log(this.respostasUsuario)
+        this.carregandoEnvio = true;
         this.quizService.responderQuiz(quizId, this.respostasUsuario).subscribe({
           next: (res) => {
             this.toastService.success('Quiz respondido com sucesso!');
-            this.resultadoFinal = res;
-            this.quizFinalizado = true;
             this.quizService.clearQuiz();
             this.resetTimer();
+            this.carregandoEnvio = false;
+            this.router.navigate([''])
           },
           error: (err) => {
             this.toastService.error('Erro ao enviar respostas do quiz.');
@@ -164,13 +185,11 @@ export class QuizComponent {
         });
       } else {
         this.toastService.error('Erro ao enviar respostas do quiz.');
+        this.carregandoEnvio = false;
       }
 
       return;
     }
-
-    this.currentQuestion++;
-    this.iniciarTimer();
   }
 
   abandonar(){

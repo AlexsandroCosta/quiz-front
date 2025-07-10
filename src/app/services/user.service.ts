@@ -39,4 +39,53 @@ export class UserService {
   getUser(): User | null {
     return this.userSubject.value;
   }
+
+  getUserPhoto(): Observable<{ foto: string }> {
+    const headers = new HttpHeaders({
+      'Authorization': `Token ${localStorage.getItem('token')}`
+    });
+
+    return this.httpClient.get<{ foto: string }>('http://127.0.0.1:8000/api/perfil/foto/', { headers });
+  }
+
+  updateUserPhoto(photo: File): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Token ${localStorage.getItem('token')}`
+    });
+
+    const formData = new FormData();
+    formData.append('foto', photo);
+
+    return this.httpClient.post('http://127.0.0.1:8000/api/perfil/foto_perfil/', formData, { headers });
+  }
+
+
+  updatePassword(currentPassword: string, newPassword: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Token ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    });
+
+    const body = {
+      current_password: currentPassword,
+      new_password: newPassword
+    };
+
+    return this.httpClient.post('http://127.0.0.1:8000/api/users/set_password/', body, { headers });
+  }
+
+  updateUsername(currentPassword: string, newUsername: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Token ${localStorage.getItem('token')}`,
+      'Content-Type': 'application/json'
+    });
+
+    const body = {
+      current_password: currentPassword,
+      new_username: newUsername
+    };
+
+    return this.httpClient.post('http://127.0.0.1:8000/api/users/set_username/', body, { headers });
+  }
+
 }

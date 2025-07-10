@@ -26,7 +26,6 @@
         <button (click)="abandonar()" class="quit-button">Abandonar Quiz</button>
     </div>
 
-        <!-- question.component.html -->
     <div class="question-container" *ngIf="quiz.conteudos.length > 0">
         <div class="question-box" *ngIf="currentPergunta">
 
@@ -44,26 +43,20 @@
 
             <!-- Botões de resposta -->
             <div class="options">
-            <button 
-                *ngFor="let resposta of currentPergunta.respostas"
-                (click)="responder(resposta)"
-                class="option">
-                {{ resposta.resposta }}
-            </button>
+                <button 
+                    *ngFor="let resposta of shuffledRespostas"
+                    (click)="responder(resposta)"
+                    class="option">
+                    {{ resposta.resposta }}
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" *ngIf="quizFinalizado">
-        <div class="modal-content">
-            <h2>Quiz Finalizado</h2>
-            <p>{{ resultadoFinal | json }}</p>
-            <p><strong>Sua Pontuação:</strong> {{ score }}</p>
-            <button (click)="abandonar()">Sair</button>
-        </div>
+    <div class="loading-overlay" *ngIf="carregandoEnvio">
+        <div class="spinner"></div>
+        <p>Enviando suas respostas...</p>
     </div>
-
-
 
 </app-default-home>
 

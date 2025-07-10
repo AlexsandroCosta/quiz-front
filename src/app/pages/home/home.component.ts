@@ -220,6 +220,9 @@ export class HomeComponent implements OnInit{
 
     // PRINCIPAL MUDANÇA: Reset completo quando área é alterada
     this.quizForm.get('area')!.valueChanges.subscribe(area => {
+      if (typeof area === 'string' && area.trim() === '') {
+        this.quizForm.controls.area.setValue('', { emitEvent: false });
+      }
       // Reset dos conteúdos selecionados
       this.selectedContents.set([]);
       this.quizForm.controls.conteudos.setValue([]);
@@ -239,6 +242,9 @@ export class HomeComponent implements OnInit{
               area: area.id
             }));
             this.availableContents.set(objs);
+
+            const current = this.currentContentControl.value;
+            this.currentContentControl.setValue(current, { emitEvent: true });
           },
           error: () => {
             console.error('Erro ao carregar conteúdos da área selecionada');
@@ -287,9 +293,11 @@ export class HomeComponent implements OnInit{
     return this.areaOptions().filter(option => option.nome.toLowerCase().includes(filterValue));
   }
 
-  displayArea(area: { id: number, nome: string } | string): string {
-    return typeof area === 'string' ? area : area?.nome;
+  displayArea(area: { id: number, nome: string } | string | null | undefined): string {
+    if (!area) return '';
+    return typeof area === 'string' ? area : area.nome ?? '';
   }
+
 
   addContent(event: MatChipInputEvent): void {
     // Se você ainda quiser permitir texto livre, crie um objeto "fantasma"

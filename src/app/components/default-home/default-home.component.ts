@@ -21,9 +21,23 @@ export class DefaultHomeComponent implements OnInit{
   ){}
 
   user: any;
+  fotoUrl: string = '/assets/images/default-profile.jpg';
 
   ngOnInit(): void {
     this.user = this.userService.getUser();
+
+    this.userService.getUserPhoto().subscribe({
+      next: (res) => {
+        if (res.foto){
+          this.fotoUrl = 'http://127.0.0.1:8000' + res.foto;
+        }else{
+          this.fotoUrl = '/assets/images/default-profile.jpg';
+        }   
+      },
+      error: () => {
+        this.fotoUrl = '/assets/images/default-profile.jpg';
+      }
+    });
   }
   
   inicio(){
