@@ -28,7 +28,11 @@ export class DefaultHomeComponent implements OnInit{
 
     this.userService.getUserPhoto().subscribe({
       next: (res) => {
-        this.fotoUrl = 'http://127.0.0.1:8000' + res.foto;
+        if (res.foto){
+          this.fotoUrl = 'http://127.0.0.1:8000' + res.foto;
+        }else{
+          this.fotoUrl = '/assets/images/default-profile.jpg';
+        }   
       },
       error: () => {
         this.fotoUrl = '/assets/images/default-profile.jpg';
