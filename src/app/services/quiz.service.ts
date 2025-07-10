@@ -34,6 +34,7 @@ export class QuizService {
   }
 
   clearQuiz() {
+    this.quiz = undefined!; // ou null
     localStorage.removeItem('quiz');
   }
   
